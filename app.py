@@ -117,7 +117,7 @@ class ExoHuntInferenceEngine:
                 rf_path = os.path.join(self.weights_dir, "random_forest_baseline.pkl")
                 if os.path.exists(rf_path):
                     self.rf_model = joblib.load(rf_path)
-                    print("  ✅ Loaded the Random Forest baseline model (24.2 MB - Pure Physics)")
+                    print("  ✅ Loaded the Random Forest baseline model (24.2 MB)")
             except Exception as e:
                 print(f"  ❌ Error loading Random Forest: {e}")
 
@@ -127,7 +127,7 @@ class ExoHuntInferenceEngine:
                 if os.path.exists(xgb_path):
                     self.xgb_model = xgb.Booster()
                     self.xgb_model.load_model(xgb_path)
-                    print("  ✅ Loaded the XGBoost Pure Physics model (3.96 MB)")
+                    print("  ✅ Loaded the XGBoost model (3.96 MB)")
             except Exception as e:
                 print(f"  ❌ Error loading XGBoost: {e}")
 
@@ -147,7 +147,7 @@ class ExoHuntInferenceEngine:
     def predict(self, model_type: str, features: Dict[str, float]) -> Dict[str, Any]:
         """
         Predict the class probabilities for one target.
-        Uses the 36 Pure Physics features (Pure Physics Benchmark - no vetting flags).
+        Uses the 36 features without vetting columns (the six vetting-derived columns are removed).
         Only 6 values come from the user; the other 30 features stay at their training-set means.
         """
         # Start from the training-set mean of every feature (or zeros)

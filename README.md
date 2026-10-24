@@ -1,61 +1,78 @@
 # 🌌 ExoHunt AI - NASA Kepler Exoplanet Discovery Engine
 **An Artificial Intelligence Application for Exploring Exoplanets with NASA Kepler Space Telescope Data**
 
-📄 **Published paper:** Dang D. T., Pham H. B. C., Nguyen M. D., & Trinh T. D. (2026). *What Do Machine Learning Models Actually Learn from the Kepler Object of Interest Catalogue? Separating Label Leakage from Label-Set Choice.* International Journal of Academic Engineering Research, 10(9), 237–247. [Read the paper (PDF)](http://ijeais.org/wp-content/uploads/2026/9/IJAER260918.pdf)
+📄 **Published paper:** Dang, D. T., Pham, H. B. C., Nguyen, M. D., & Trinh, T. D. (2026). *What Do Machine Learning Models Actually Learn from the Kepler Object of Interest Catalogue? Separating Label Leakage from Label-Set Choice.* International Journal of Academic Engineering Research, 10(9), 237–247. [Read the paper (PDF)](http://ijeais.org/wp-content/uploads/2026/9/IJAER260918.pdf)
+
+**Authors:** Đặng Đức Thanh¹, Pham Hoang Bao Chau², Nguyen Minh Duc³, Trinh Thanh Do⁴\*
+¹Hanoi - Amsterdam High School for the Gifted, Hanoi · ²Experimental High School of Ho Chi Minh City University of Education · ³Techcom Life Insurance Joint Stock Company · ⁴Rikai Technology, Danang · \*Corresponding author
 
 ---
 
 ## 📌 1. PROJECT OVERVIEW
-**ExoHunt AI** is an in-depth data-science and machine-learning research project. It applies modern AI architectures to classify the light-dip (transit) signals of **9,564 Kepler Objects of Interest (KOIs)** from NASA's Kepler Space Telescope, using the parameters listed for each signal in NASA's cumulative KOI catalogue (the light curves themselves are not used).
+**ExoHunt AI** benchmarks three classifiers — a random forest, XGBoost and a PyTorch one-dimensional convolutional network — on NASA's cumulative **Kepler Object of Interest (KOI)** table (**N = 9,564** records, obtained through its Kaggle distribution). All three models are trained on an identical set of **36 features** with every vetting-derived column removed. The light curves themselves are not used: each record holds parameters derived from earlier analysis of the light curve and the host star.
 
-The core goal of the research is to classify each signal into one of 3 groups of astronomical objects:
-1. 🟢 **CONFIRMED (confirmed planet):** real exoplanets orbiting their host star, with the characteristic flat-bottomed, U-shaped transit signal.
-2. 🔵 **CANDIDATE (planet candidate):** promising signals that need more observations before they can be verified.
-3. 🔴 **FALSE POSITIVE (impostor signal):** astronomical phenomena mistaken for exoplanets (mainly **eclipsing binary stars**, which produce deep V-shaped dips, or noise from the host star's activity).
-
----
-
-## 🤖 2. COMPARING 3 AI MODEL ARCHITECTURES (PURE PHYSICS BENCHMARK)
-
-In the latest version of the research, all 3 models use the same **Pure Physics** setup: **36 features without NASA's vetting flags** — the four false-positive flags produced by NASA's automated vetting (the Robovetter) are removed completely. All models were trained in a Kaggle notebook (the recorded run used the CPU); XGBoost was additionally checked with 5-fold stratified cross-validation:
-
-| Model Architecture | Core Technique | Test Accuracy | ROC-AUC | Role in the Research |
-| :--- | :--- | :---: | :---: | :--- |
-| 🌲 **Random Forest** | Ensemble of decision trees (100 estimators), SMOTE balancing | **78.5%** | **0.961** | **Tree-ensemble model:** trained on the 36 transit, orbital & stellar features, with high stability. |
-| ⚡ **XGBoost Pure Physics** | Gradient boosting, anti-leakage protection | **79.3%** | **0.966** | **Pure Physics model (core result):** 5-fold CV macro-F1 0.739 ± 0.010. Forces the model to learn from transit, orbital and stellar parameters instead of the vetting flags. |
-| 🧠 **PyTorch 1D-CNN** | Deep learning: Conv1D(16→32) + BatchNorm + MaxPool1D + Dropout(0.3) | **74.9%** | **0.959** | **Convolutional deep network:** automatically extracts complex non-linear interactions between the period, depth and stellar-radius parameters. |
-
-*Test accuracy is measured on 1,913 test KOIs with all 3 labels. ROC-AUC is for the CONFIRMED class (one-vs-rest).*
+Each signal belongs to one of 3 dispositions (`koi_disposition`):
+1. 🟢 **CONFIRMED:** confirmed planets.
+2. 🔵 **CANDIDATE:** signals whose vetting is unfinished — a position in an administrative queue rather than a property of an object.
+3. 🔴 **FALSE POSITIVE:** signals rejected as impostors, such as grazing eclipsing binaries, starspots or instrument artefacts.
 
 ---
 
-## 🔬 3. SCIENTIFIC FINDING: DATA LEAKAGE (DEEP DIVE)
+## 🤖 2. COMPARING THE 3 MODEL ARCHITECTURES
 
-The key parts of this analysis are **Sections 4, 6 and 6c** of the notebook:
+Missing values are imputed with the column median, the data are split by stratified random sampling into an 80% training partition (n = 7,651) and an independent 20% test partition (n = 1,913), features are standardised with parameters estimated on the training partition alone, and SMOTE is applied only inside the training partition (4,018 records per class). The six vetting-derived columns (the four Robovetter false-positive flags, `koi_score` and `koi_pdisposition`) and five identifier columns are removed.
 
-### 🚨 The "98.24% Illusion" (Why did the baseline reach 98%?)
-When the initial baseline model was trained on 43 features, its accuracy reached an extremely high 98.24%. But four of those columns are false-positive flags produced by NASA's own vetting (the automated Robovetter) — the same process that assigns the labels — so the model was partly reading the answer:
-* `koi_fpflag_nt` (Not Transit-Like Flag)
-* `koi_fpflag_ss` (Stellar Eclipse Flag - eclipsing binary)
-* `koi_fpflag_co` (Centroid Offset Flag)
-* `koi_fpflag_ec` (Ephemeris Match Flag)
+| Model | Core technique | Test accuracy | Macro F1 | ROC-AUC (CONFIRMED) | Role |
+| :--- | :--- | :---: | :---: | :---: | :--- |
+| 🌲 **Random Forest** | 100 trees under a fixed seed, random feature subset at each split | **.79** | **.75** | **.961** | Conventional baseline for tabular problems of this size |
+| ⚡ **XGBoost** | Gradient boosting: multi:softprob, learning rate .08, max depth 6, 250 estimators (fixed, not tuned) | **.79** | **.76** | **.966** | Re-estimated across three feature sets and two label sets (Section 3 below) |
+| 🧠 **PyTorch 1D-CNN** | Conv1d(1→16) and Conv1d(16→32) with batch normalisation, ReLU and max pooling; 64-unit dense layer with dropout .3 | **.75** | **.73** | **.959** | Architectural comparison under a fixed representation (convolution along the 36-feature vector, not over light curves) |
 
-👉 **Conclusion:** the old model suffered from serious **data leakage** — the AI did not "understand" astrophysics, it was "memorizing" the result of NASA's vetting! Such a model would be **useless** on data from new telescope missions (such as TESS or PLATO), where the incoming data have not yet been flagged by anyone.
+*Test partition n = 1,913, three labels, no vetting columns. Five-fold stratified cross-validation of XGBoost: macro F1 .739 (SD = .012). On the paired test predictions XGBoost beats the 1D-CNN with a McNemar statistic of 14.01 (p < .001), while the three AUCs differ by only .007: architecture makes a small difference to hard classification and almost none to ranking.*
 
-### 💡 The Fix: the Pure Physics Benchmark
-To build an AI that could genuinely find new exoplanets, we **removed the 4 leakage flags from the entire pipeline** and retrained all 3 models (Random Forest, XGBoost, 1D-CNN) on the **36 remaining features** (transit, orbital and stellar parameters).
-* **Honest accuracy:** **75% - 79%** (AUC **0.959 - 0.966**) — an honest figure that reflects how hard the task really is and what the models can actually do.
-* **Corrected SHAP analysis:** the original SHAP figures were drawn incorrectly. For a 3-class model, recent SHAP versions return an array of shape (samples, features, classes); `shap.summary_plot` read it as interaction values and drew only the first three columns of the table (`koi_period`, `koi_period_err1`, `koi_period_err2`), so those columns only *looked* most important. The corrected per-class SHAP summary (regenerated from the saved XGBoost model in October 2026) ranks the features as follows:
-  1. `koi_model_snr` (transit signal-to-noise ratio) — by far the strongest input
-  2. `koi_prad` (planet radius)
-  3. `koi_steff_err1` & `koi_duration_err1` (measurement uncertainties — catalogue properties rather than physics)
-  4. `koi_period` & `koi_duration` (orbital period and transit duration)
-
-  Sky coordinates (`ra`, `dec`) also rank in the top 11, so not every signal the model uses is physical.
+Errors concentrate on CANDIDATE: XGBoost's recall is .55 on CANDIDATE against .85 on CONFIRMED and .88 on FALSE POSITIVE (1,517 of 1,913 test KOIs correct, 396 errors).
 
 ---
 
-## 🚀 4. HOW TO INSTALL THE LIBRARIES & RUN THE PROJECT
+## 🔬 3. SCIENTIFIC FINDING: LABEL LEAKAGE VS. LABEL-SET CHOICE
+
+Published accuracies on the KOI catalogue range from below .80 to above .98. Two things differ across these studies and are rarely stated:
+* **The feature set.** Six columns encode the outcome of NASA's automated vetting (the Robovetter), which is also the source of the class label: `koi_fpflag_nt` (not transit-like), `koi_fpflag_ss` (stellar eclipse), `koi_fpflag_co` (centroid offset), `koi_fpflag_ec` (ephemeris match indicating contamination), the disposition score `koi_score` and the pipeline disposition `koi_pdisposition`. A model given them predicts an outcome from its own antecedents — label leakage in its textbook form.
+* **The label set.** Whether CANDIDATE is a third class, or excluded. The highest catalogue-based figure, 98% (Sturrock et al.), is a two-class result (CONFIRMED vs FALSE POSITIVE) obtained with the four flags still in the feature set.
+
+The XGBoost configuration was re-estimated across three feature sets and two label sets on the same split, seed and hyperparameters:
+
+| Cell | Feature set | Labels | Accuracy | Macro F1 | Increment |
+| :---: | :--- | :---: | :---: | :---: | :--- |
+| A1 | 36 columns, no vetting | Three | .793 | .758 | reference |
+| A2 | 36 + four false-positive flags | Three | .907 | .878 | +.114 over A1 |
+| A3 | 36 + four flags + koi_score + koi_pdisposition | Three | .925 | .897 | +.018 over A2 |
+| B1 | 36 columns, no vetting | Two | .939 | .930 | +.146 over A1 |
+| B2 | 36 + four false-positive flags | Two | .994 | .993 | +.055 over B1 |
+| B3 | 36 + four flags + koi_score + koi_pdisposition | Two | .997 | .997 | +.003 over B2 |
+
+*Binary cells exclude CANDIDATE records from both partitions (test n = 1,464 against 1,913), so levels are not directly comparable across label sets and the increments carry the argument. Cell B2 corresponds to the design of Sturrock et al.*
+
+👉 **Conclusions:**
+* Cell B2 reaches **.994**, above the 98% that Sturrock et al. reported: the published figure is reproducible, and its distance from .79 is a matter of design alone.
+* Averaged over both orders, **11.7** of the **20.1** accuracy points belong to the label set and **8.5** to the four flags — the label set is the larger term.
+* `koi_score` and `koi_pdisposition` add only .018 (three-class) and .003 (binary) once the flags are present.
+* Accuracy on the KOI catalogue is therefore not interpretable unless both the feature set and the label set are disclosed.
+
+---
+
+## 📌 4. WHAT THE RESULTS DO NOT SUPPORT (LIMITATIONS)
+
+* **Host-star split:** 23.9% of records share a host with at least one other record. A split grouped by Kepler Input Catalog ID gives accuracy .779 and macro F1 .748 (against .793 and .758) — real leakage, worth about 1.4 points.
+* **Measurement uncertainties:** dropping every uncertainty column (leaving 16 features) lowers accuracy from .793 to .764 and macro F1 from .758 to .733 — a residual channel worth about three points.
+* **Cross-validation:** for the five-fold check, feature scaling was estimated across the complete dataset and no resampling was applied inside the folds.
+* **Interpretability:** SHAP was applied during development, but the multi-class output was handled incorrectly and the resulting figures proved unusable; a corrected analysis reporting attributions separately by class is the natural next step.
+* **Representation:** the 1D-CNN operated on a tabular vector rather than on photometry, so the comparison with light-curve architectures remains indirect.
+* **Snapshot:** a single catalogue snapshot was used; repeating the analysis on a later release would separate genuine misclassification from anticipation of reclassification.
+
+---
+
+## 🚀 5. HOW TO INSTALL THE LIBRARIES & RUN THE PROJECT
 
 The project can run in 2 ways: **with the Python backend server (FastAPI + PyTorch engine)** or **directly in the browser (offline client-side mode)**.
 
@@ -93,11 +110,11 @@ With the Python server, the app runs inference directly with the real model weig
 If you do not want to install Python, or you are on a computer without a programming environment, you can open the page on its own:
 1. Open the `exohunt-ai-nasa` project folder.
 2. Double-click **`index.html`** (or right-click and choose *Open with -> Google Chrome / Microsoft Edge*).
-3. All features work: the A/B Testing demo, the simulated transit light curve and the 600-DPI figures. Without the server, the trained models run only for the four real Kepler presets (their outputs were precomputed from the saved weights); the hypothetical presets and custom slider values show a clearly labelled rule-based illustration instead.
+3. All features work: the A/B Testing demo, the simulated transit light curve and the 600-DPI figures. Without the server, the trained models run only for the four real Kepler presets (their outputs were precomputed from the saved weights); the example presets and custom slider values show a clearly labelled rule-based illustration instead.
 
 ---
 
-## 📁 5. DIRECTORY STRUCTURE
+## 📁 6. DIRECTORY STRUCTURE
 
 ```text
 exohunt-ai-nasa/
@@ -110,35 +127,33 @@ exohunt-ai-nasa/
 ├── 📖 README.md                         # Report & user guide (this file)
 ├── ⚙️ .gitignore                        # Ignores Python build files & caches
 │
-├── 📓 exohunt-ai-nasa-dangducthanh.ipynb # Original research notebook (about 500 lines of code: EDA, ML, DL, SHAP)
+├── 📓 exohunt-ai-nasa-dangducthanh.ipynb # Research notebook (about 500 lines of code: EDA, ML, DL, SHAP)
 │
 ├── 📂 data/
 │   └── cumulative.csv                   # NASA cumulative KOI table (Kaggle "Kepler Exoplanet Search Results")
 │
-├── 📂 exoplanet_research_plots/         # 5 high-resolution research figures (600 DPI)
-│   ├── eda_exoplanet_analysis.png       # Exploratory data analysis & physical relationships
-│   ├── roc_auc_comparison.png           # ROC-AUC curves comparing the 3 models (AUC 0.959 - 0.966)
-│   ├── shap_feature_importance.png      # Corrected SHAP summary of the Section 6 XGBoost model (same 36 features)
-│   ├── shap_pure_physics.png            # Corrected SHAP summary of the Pure Physics XGBoost model (Section 6c)
-│   └── confusion_matrix_errors.png      # Confusion matrix & error analysis (1,913 test samples)
+├── 📂 exoplanet_research_plots/         # Figures exported by the notebook (600 DPI)
+│   ├── eda_exoplanet_analysis.png       # Label distribution & orbital period vs. transit depth
+│   ├── roc_auc_comparison.png           # One-vs-rest ROC curves for CONFIRMED (AUC .959 - .966)
+│   ├── confusion_matrix_errors.png      # XGBoost confusion matrix (1,913 test KOIs)
+│   ├── shap_feature_importance.png      # SHAP figure from development: unusable (see Section 4), not shown on the site
+│   └── shap_pure_physics.png            # SHAP figure from development: unusable (see Section 4), not shown on the site
 │
 └── 📂 weight/                           # Packaged model weights
-    ├── random_forest_baseline.pkl       # Random Forest Pure Physics (24.2 MB)
-    ├── xgboost_physics_model.json       # XGBoost Pure Physics (3.96 MB)
+    ├── random_forest_baseline.pkl       # Random Forest (24.2 MB)
+    ├── xgboost_physics_model.json       # XGBoost (3.96 MB)
     ├── 1d_cnn_weights.pth               # PyTorch 1D-CNN state dict (86.4 KB)
-    ├── scaler_main.pkl                  # Z-score StandardScaler fitted on the training set (2.2 KB)
+    ├── scaler_main.pkl                  # Z-score StandardScaler fitted on the training partition (2.2 KB)
     └── label_encoder.pkl                # Label encoder: CANDIDATE=0, CONFIRMED=1, FALSE POSITIVE=2 (514 B)
 ```
 
 ---
 
-## 📝 6. NOTES & CORRECTIONS (OCTOBER 2026)
+## 📝 7. NOTES ON THE CODE (OCTOBER 2026)
 
-* **SHAP figures:** both SHAP figures were regenerated with a corrected per-class plot (see Section 3). Because Cell 4 of the notebook already removes the four flags, the Section 6 and Section 6c XGBoost models are identical, so the two figures show the same model.
-* **Exported scaler:** `weight/scaler_main.pkl` used to be refit on the full dataset (9,564 rows) during the cross-validation step, instead of the training-set scaler the models were trained with. With that file the XGBoost model's test accuracy fell to 67.1%. The file now holds the training-set scaler (7,651 rows), which reproduces the notebook's test results exactly.
-* **Backend:** `app.py` mapped the model probabilities to the wrong labels (CANDIDATE and CONFIRMED were swapped). It now maps them by class name and reports whether a result came from a model or from the rule-based fallback.
-* **Web demo:** the static page used to show hard-coded probabilities chosen from each preset's known label. It now shows the real outputs of the saved models for the four real Kepler objects and labels everything else as a rule-based illustration.
-* **Cross-validation:** the earlier figure of F1 0.840 came from cross-validating on the SMOTE-oversampled training set, where synthetic samples made from the same KOIs land in both training and validation folds. The leakage-free 5-fold CV in Section 6b gives macro-F1 0.739 ± 0.010.
+* **Exported scaler:** `weight/scaler_main.pkl` now holds the scaler fitted on the training partition, as described in the paper. The earlier file had been refit on the full dataset (9,564 rows) during the cross-validation step; with it, the saved XGBoost model's test accuracy fell to .671.
+* **Backend:** `app.py` used to map the model probabilities to the wrong labels (CANDIDATE and CONFIRMED were swapped). It now maps them by class name and reports whether a result came from a model or from the rule-based fallback.
+* **Web demo:** the page shows the real outputs of the saved models for the four real Kepler targets and labels everything else as a rule-based illustration.
 
 ---
-*Research team: Dang D. T. (Đặng Đức Thanh), Pham H. B. C., Nguyen M. D. & Trinh T. D. · Web app development: Đặng Đức Thanh - ExoHunt AI NASA Exoplanet Research Project.*
+*Authors: Đặng Đức Thanh, Pham Hoang Bao Chau, Nguyen Minh Duc & Trinh Thanh Do (corresponding author) · Web app development: Đặng Đức Thanh - ExoHunt AI NASA Exoplanet Research Project.*

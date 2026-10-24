@@ -207,7 +207,7 @@ const PRESET_TARGETS = {
         desc: 'Eclipsing binary star (false positive). A very large, V-shaped drop in brightness (>10,000 ppm) that mimics an exoplanet.'
     },
     'super-earth': {
-        name: 'Hypothetical super-Earth (not a real KOI)',
+        name: 'Super-Earth example (hypothetical, not a real KOI)',
         hypothetical: true,
         srad: 0.65,
         steff: 3800,
@@ -219,7 +219,7 @@ const PRESET_TARGETS = {
         desc: 'Hypothetical example (not a real KOI): a super-Earth of about 1.5 Earth radii orbiting a cool dwarf star.'
     },
     'hot-jupiter': {
-        name: 'Hypothetical hot Jupiter (not a real KOI)',
+        name: 'Hot Jupiter example (hypothetical, not a real KOI)',
         hypothetical: true,
         srad: 1.20,
         steff: 6200,
@@ -259,25 +259,22 @@ const PRESET_MODEL_OUTPUTS = {
     }
 };
 
-/* Test-set results recorded in the notebook (1,913 test KOIs). */
+/* Test-set results reported in the paper (Tables 2-3, n = 1,913). */
 const MODEL_INFO = {
     'XGBoost': {
         color: '#1e40af',
-        title: '⚡ XGBoost Pure Physics',
-        file: 'weight/xgboost_physics_model.json',
-        metrics: 'test accuracy 79.3% · macro-F1 0.76 · ROC-AUC 0.966 · 5-fold CV macro-F1 0.739 ± 0.010'
+        title: '⚡ XGBoost',
+        metrics: 'accuracy .79 · macro F1 .76 · AUC .966 · five-fold CV macro F1 .739 (SD = .012)'
     },
     'Random Forest': {
         color: '#0e7a3a',
-        title: '🌲 Random Forest Pure Physics',
-        file: 'weight/random_forest_baseline.pkl',
-        metrics: 'test accuracy 78.5% · precision/recall CONFIRMED 0.83/0.82, FALSE POSITIVE 0.86/0.86 · trained after SMOTE balancing (4,018 samples per class)'
+        title: '🌲 Random Forest',
+        metrics: 'accuracy .79 · macro F1 .75 · AUC .961'
     },
     '1D-CNN': {
         color: '#4338ca',
-        title: '🧠 PyTorch 1D-CNN Pure Physics',
-        file: 'weight/1d_cnn_weights.pth',
-        metrics: 'test accuracy 74.9% · ROC-AUC 0.959 · hardest class CANDIDATE (precision 0.50, recall 0.62)'
+        title: '🧠 PyTorch 1D-CNN',
+        metrics: 'accuracy .75 · macro F1 .73 · AUC .959'
     }
 };
 
@@ -414,7 +411,6 @@ function updateInferenceEngine() {
     const preset = PRESET_TARGETS[currentTargetKey];
     const precomputed = PRESET_MODEL_OUTPUTS[currentTargetKey];
 
-    updatePresetDescription(preset);
     renderLightcurve(v.depth, v.duration, v.shape);
 
     if (precomputed) {
@@ -504,7 +500,7 @@ function renderPredictionResults(probs, source) {
         }
 
         if (source === 'rules') {
-            confEl.textContent = `Rule-based estimate: ${confidence}% (no trained model)`;
+            confEl.textContent = `Rule-based estimate: ${confidence}%`;
         } else {
             confEl.textContent = `AI confidence (${currentModel}): ${confidence}%`;
         }
@@ -512,9 +508,9 @@ function renderPredictionResults(probs, source) {
 
     if (statusEl) {
         statusEl.textContent = {
-            precomputed: 'AI CLASSIFICATION RESULT · SAVED MODEL (PRECOMPUTED)',
-            backend: 'AI CLASSIFICATION RESULT · LIVE PYTHON BACKEND',
-            rules: 'RULE-BASED ILLUSTRATION · NOT A TRAINED MODEL'
+            precomputed: 'AI CLASSIFICATION RESULT',
+            backend: 'AI CLASSIFICATION RESULT · LIVE BACKEND',
+            rules: 'RULE-BASED ILLUSTRATION · NOT A MODEL'
         }[source];
     }
 
@@ -545,8 +541,9 @@ function renderLightcurve(depth = 615.8, duration = 3.0, shape = 'U') {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    // Match the drawing buffer to the canvas's rendered width (padding differs on phones)
     const containerWidth = canvas.parentElement.clientWidth || 600;
-    const width = canvas.width = containerWidth - 56;
+    const width = canvas.width = Math.round(canvas.clientWidth) || (containerWidth - 56);
     const height = canvas.height = 220;
 
     ctx.clearRect(0, 0, width, height);
@@ -619,34 +616,30 @@ function renderLightcurve(depth = 615.8, duration = 3.0, shape = 'U') {
 
     ctx.fillStyle = '#38bdf8';
     ctx.font = 'bold 13px "JetBrains Mono", monospace';
-    ctx.fillText(`Transit depth -${depth} ppm | duration ${duration} h`, Math.max(16, centerX - 120), lowestY - 14);
+    let caption = `Transit depth -${depth} ppm | duration ${duration} h`;
+    if (ctx.measureText(caption).width > width - 32) caption = `Depth -${depth} ppm | ${duration} h`;
+    ctx.fillText(caption, 16, height - 16);
 }
 
 /* ==========================================================================
    8. RESULT DETAILS (WHAT PRODUCED THE NUMBERS ABOVE)
    ========================================================================== */
-function updatePresetDescription(preset) {
-    const el = document.getElementById('preset-desc');
-    if (!el) return;
-    el.textContent = preset ? preset.desc : 'Custom values set with the sliders.';
-}
-
 function updateResultDetails(source, v, preset) {
     const xaiContent = document.getElementById('xai-content');
     if (!xaiContent) return;
     const info = MODEL_INFO[currentModel];
     let html = '';
 
+    const header = (color, text) => `<div style="margin-bottom: 0.6rem; color: ${color}; font-weight: 800; font-size: 1.05rem;">${text}</div>`;
     if (source === 'precomputed') {
-        html = `<div style="margin-bottom: 0.6rem; color: ${info.color}; font-weight: 800; font-size: 1.05rem;">${info.title} (${info.metrics}):</div>
-        <strong>${preset.name}</strong> — NASA catalogue label: <strong>${preset.label}</strong>.<br>
-        These probabilities are the real output of the saved model (<code style="overflow-wrap: anywhere;">${info.file}</code>) for this object's 36 catalogue features, precomputed offline because the models cannot run on a static web page. The object was in the <strong>${preset.split}</strong> split, so this is an in-sample prediction and will look more confident than for a new object.`;
+        html = header(info.color, `${info.title} — ${info.metrics}`) +
+        `Output of the saved model for <strong>${preset.name}</strong> (NASA label: <strong>${preset.label}</strong>), precomputed from its 36 catalogue features because the models cannot run on a static page. This object was in the ${preset.split} partition, so the prediction is in-sample.`;
     } else if (source === 'backend') {
-        html = `<div style="margin-bottom: 0.6rem; color: ${info.color}; font-weight: 800; font-size: 1.05rem;">${info.title} — live output from the Python backend:</div>
-        Live output of the saved model (<code style="overflow-wrap: anywhere;">${info.file}</code>) from <code>app.py</code>. Only the 6 slider values (depth <strong>${v.depth} ppm</strong>, period <strong>${v.period} days</strong>, star radius <strong>${v.srad} R☉</strong>, …) are sent; the other 30 features are set to their training-set averages, so treat this as a what-if illustration rather than a real classification.`;
+        html = header(info.color, `${info.title} — live output from app.py`) +
+        `Only the 6 slider values are sent to the model; the other 30 features are set to their training-set averages, so treat this as a what-if illustration.`;
     } else {
-        html = `<div style="margin-bottom: 0.6rem; color: #b45309; font-weight: 800; font-size: 1.05rem;">📐 Rule-based illustration (no trained model):</div>
-        ${preset && preset.hypothetical ? '<strong>' + preset.name + '</strong>. ' : ''}The trained models need all 36 catalogue features, so on this static page they only run for the four real Kepler objects. These bars come from simple rules of thumb instead: very deep dips around small stars look like eclipsing binaries, 100–5,000 ppm dips with periods over 1 day look planet-like, and very shallow dips or periods over 100 days stay candidates. The model buttons do not change this estimate. Run the Python backend (<code>python app.py</code>) to score custom values with the real models.`;
+        html = header('#b45309', '📐 Rule-based illustration (no trained model)') +
+        `${preset && preset.hypothetical ? '<strong>' + preset.name + '</strong>. ' : ''}The models need all 36 catalogue features, so on this static page they run only for the four real Kepler targets. These bars come from simple rules of thumb on depth, period and star size; run <code>python app.py</code> to score custom values with the real models.`;
     }
 
     xaiContent.innerHTML = html;

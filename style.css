@@ -314,7 +314,7 @@ body {
 /* Stats Grid */
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
     gap: 1.8rem;
     margin-bottom: 3.5rem;
 }
@@ -1125,7 +1125,7 @@ input[type=range]::-webkit-slider-thumb:hover {
 
 .flag-box-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(230px, 100%), 1fr));
     gap: 1.2rem;
     margin-top: 1.8rem;
 }
@@ -1195,7 +1195,7 @@ input[type=range]::-webkit-slider-thumb:hover {
    ========================================================================== */
 .weights-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
     gap: 1.8rem;
 }
 
@@ -1293,4 +1293,129 @@ input[type=range]::-webkit-slider-thumb:hover {
 .footer-highlight {
     color: var(--nasa-blue-dark);
     font-weight: 700;
+}
+
+/* ==========================================================================
+   PAPER-ALIGNED CONTENT (authors, wide plot, findings, Table 5)
+   ========================================================================== */
+.paper-authors {
+    margin-top: 0.8rem;
+    padding-top: 0.8rem;
+    border-top: 1px dashed #bfdbfe;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+}
+
+.paper-authors strong {
+    color: var(--text-secondary);
+}
+
+.plot-card.plot-wide {
+    grid-column: 1 / -1;
+}
+
+.plot-card.plot-wide .plot-img-container {
+    height: 400px;
+}
+
+.paper-list {
+    margin: 0.4rem 0 0 1.3rem;
+    padding: 0;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.75;
+}
+
+.paper-list li {
+    margin-bottom: 0.7rem;
+    padding-left: 0.3rem;
+}
+
+.paper-list li::marker {
+    color: var(--nasa-blue);
+}
+
+.leakage-table.compact th,
+.leakage-table.compact td {
+    padding: 0.95rem 1.1rem;
+}
+
+.leakage-table td.num {
+    font-family: var(--font-mono);
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.leakage-table td.inc {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--status-confirmed);
+    white-space: nowrap;
+}
+
+.leakage-table tr.row-ref td {
+    background: var(--status-confirmed-bg);
+}
+
+.leakage-table tr.row-sturrock td {
+    background: var(--status-false-pos-bg);
+}
+
+.table-note {
+    margin-top: 1.1rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+/* ==========================================================================
+   PHONES: tighter spacing and smaller display type so long English words
+   ("CONFIRMED EXOPLANET", "Intelligence") fit without being clipped
+   ========================================================================== */
+@media (max-width: 600px) {
+    .navbar { padding: 0.8rem 1.2rem; }
+    .nav-tabs { width: calc(100% - 2rem); }
+    .main-container { padding: 1.6rem 1rem; }
+
+    .hero-banner { padding: 2rem 1.3rem; margin-bottom: 2.2rem; }
+    .hero-banner::after { font-size: 9rem; right: 0; }
+    .hero-title { font-size: 1.75rem; }
+    .hero-desc { font-size: 1.02rem; }
+
+    .section-heading { font-size: 1.4rem; align-items: flex-start; }
+    .section-heading::after { display: none; }
+
+    .stat-card { padding: 1.5rem; }
+    .model-card { padding: 1.6rem 1.3rem; }
+
+    .panel-card { padding: 1.5rem 1.1rem; }
+    .panel-title { font-size: 1.2rem; }
+    .input-header { flex-wrap: wrap; gap: 0.5rem; }
+
+    .prediction-result-box { padding: 1.6rem 1rem; margin-bottom: 1.6rem; }
+    .pred-status-label { font-size: 0.75rem; letter-spacing: 1px; }
+    .pred-main-title { font-size: 1.55rem; line-height: 1.25; }
+    .pred-conf-score { font-size: 1rem; }
+
+    .prob-bars-container { padding: 1.1rem; margin-bottom: 1.6rem; }
+    .prob-header { font-size: 0.8rem; gap: 0.6rem; }
+    .lightcurve-box { padding: 1.1rem; margin-bottom: 1.6rem; }
+    .lightcurve-header { flex-wrap: wrap; gap: 0.4rem; }
+    .xai-box { padding: 1.3rem 1.1rem; }
+
+    .plot-info { padding: 1.4rem 1.2rem; }
+    .plot-img-container,
+    .plot-card.plot-wide .plot-img-container { height: 260px; }
+
+    .leakage-card { padding: 1.6rem 1.2rem; }
+    .leakage-step-title { font-size: 1.3rem; align-items: flex-start; }
+    .leakage-text { font-size: 1rem; }
+    .leakage-table th,
+    .leakage-table td,
+    .leakage-table.compact th,
+    .leakage-table.compact td { padding: 0.8rem 0.9rem; }
+
+    .weight-card { padding: 1.5rem 1.2rem; }
+    .footer { margin-top: 4rem; padding: 2.5rem 1.2rem; }
 }

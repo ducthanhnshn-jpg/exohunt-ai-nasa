@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🌌 ExoHunt AI - NASA Kepler Exoplanet Discovery Engine</title>
-    <meta name="description" content="AI that classifies exoplanet signals from NASA's Kepler Space Telescope data. Compares Random Forest, Physics XGBoost and a PyTorch 1D-CNN.">
+    <meta name="description" content="Random Forest, XGBoost and a PyTorch 1D-CNN trained on NASA's Kepler Object of Interest catalogue with every vetting-derived column removed: separating label leakage from label-set choice.">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -29,7 +29,7 @@
     <nav class="nav-tabs" id="main-nav-tabs">
         <button type="button" class="tab-btn active" data-tab="tab-dashboard">🔭 Dashboard</button>
         <button type="button" class="tab-btn" data-tab="tab-playground">🤖 AI Classification Demo</button>
-        <button type="button" class="tab-btn" data-tab="tab-plots">📊 Research Plots &amp; SHAP</button>
+        <button type="button" class="tab-btn" data-tab="tab-plots">📊 Research Plots</button>
         <button type="button" class="tab-btn" data-tab="tab-leakage">🔬 Data Leakage Deep Dive</button>
         <button type="button" class="tab-btn" data-tab="tab-weights">📁 Architecture &amp; Weights</button>
     </nav>
@@ -43,10 +43,14 @@
             <div class="hero-banner">
                 <h2 class="hero-title">Exploring Exoplanets with Artificial Intelligence Using NASA Kepler Space Telescope Data</h2>
                 <p class="hero-desc">
-                    A multi-architecture AI system that combines classical machine learning (Random Forest, XGBoost) with deep learning (a PyTorch 1D-CNN) to classify the transit signals of 9,564 Kepler Objects of Interest and to separate real planets from false positives such as eclipsing binary stars.
+                    Three classifiers — Random Forest, XGBoost and a PyTorch 1D convolutional network — trained on an identical 36-feature set from NASA's cumulative Kepler Object of Interest table (N = 9,564), with every vetting-derived column removed, to classify each signal as CONFIRMED, CANDIDATE or FALSE POSITIVE and to separate label leakage from label-set choice.
                 </p>
                 <div class="hero-paper">
-                    📄 <strong>Published paper:</strong> Dang D. T., Pham H. B. C., Nguyen M. D., &amp; Trinh T. D. (2026). <em>What Do Machine Learning Models Actually Learn from the Kepler Object of Interest Catalogue? Separating Label Leakage from Label-Set Choice.</em> International Journal of Academic Engineering Research, 10(9), 237–247. <a href="http://ijeais.org/wp-content/uploads/2026/9/IJAER260918.pdf" target="_blank" rel="noopener">Read the paper (PDF)</a>
+                    📄 <strong>Published paper:</strong> Dang, D. T., Pham, H. B. C., Nguyen, M. D., &amp; Trinh, T. D. (2026). <em>What Do Machine Learning Models Actually Learn from the Kepler Object of Interest Catalogue? Separating Label Leakage from Label-Set Choice.</em> International Journal of Academic Engineering Research, 10(9), 237–247. <a href="http://ijeais.org/wp-content/uploads/2026/9/IJAER260918.pdf" target="_blank" rel="noopener">Read the paper (PDF)</a>
+                    <div class="paper-authors">
+                        <strong>Authors:</strong> Đặng Đức Thanh<sup>1</sup>, Pham Hoang Bao Chau<sup>2</sup>, Nguyen Minh Duc<sup>3</sup>, Trinh Thanh Do<sup>4*</sup><br>
+                        <sup>1</sup>Hanoi - Amsterdam High School for the Gifted, Hanoi · <sup>2</sup>Experimental High School of Ho Chi Minh City University of Education · <sup>3</sup>Techcom Life Insurance Joint Stock Company · <sup>4</sup>Rikai Technology, Danang · <sup>*</sup>Corresponding author
+                    </div>
                 </div>
             </div>
 
@@ -56,25 +60,25 @@
                     <span class="stat-icon">🪐</span>
                     <div class="stat-value">9,564</div>
                     <div class="stat-label">Kepler Objects of Interest (KOIs)</div>
-                    <div class="stat-sub">Observations from the NASA Exoplanet Archive</div>
+                    <div class="stat-sub">Cumulative KOI table, NASA Exoplanet Archive</div>
                 </div>
                 <div class="stat-card">
                     <span class="stat-icon">🧬</span>
                     <div class="stat-value">36</div>
-                    <div class="stat-label">Features Without Vetting Flags</div>
-                    <div class="stat-sub">Radius, period, depth, surface gravity, temperature… (Pure Physics)</div>
+                    <div class="stat-label">Features Without Vetting Columns</div>
+                    <div class="stat-sub">Orbital, stellar, signal-quality &amp; positional parameters (six vetting columns removed)</div>
                 </div>
                 <div class="stat-card">
                     <span class="stat-icon">⚡</span>
                     <div class="stat-value">3 Models</div>
-                    <div class="stat-label">Pure Physics Benchmark</div>
+                    <div class="stat-label">Identical Representation</div>
                     <div class="stat-sub">Random Forest | XGBoost | PyTorch 1D-CNN</div>
                 </div>
                 <div class="stat-card">
                     <span class="stat-icon">🎯</span>
                     <div class="stat-value">75% - 79%</div>
-                    <div class="stat-label">Pure Physics Test Accuracy</div>
-                    <div class="stat-sub">No vetting-flag leakage · 3 classes · 1,913 test KOIs</div>
+                    <div class="stat-label">Three-Class Test Accuracy</div>
+                    <div class="stat-sub">n = 1,913 test KOIs · AUC .959 – .966</div>
                 </div>
             </div>
 
@@ -85,43 +89,43 @@
                     <div>
                         <div class="model-header">
                             <h4 class="model-name">Random Forest</h4>
-                            <span class="model-tag tag-physics">Pure Physics</span>
+                            <span class="model-tag tag-physics">Baseline</span>
                         </div>
                         <p class="model-body">
-                            A 100-tree random forest, retrained on the 36 features after completely removing NASA's 4 vetting flags. The baseline model now follows the Pure Physics setup.
+                            100 trees under a fixed seed, drawing a random subset of features at each split and aggregating the votes — the conventional baseline for tabular problems of this size.
                         </p>
                         <ul class="model-features-list">
-                            <li>Missing values filled automatically with a median imputer</li>
-                            <li>Class balancing with SMOTE</li>
-                            <li>All 4 fpflag columns removed (Pure Physics)</li>
-                            <li>Trained on 36 transit, orbital &amp; stellar features</li>
+                            <li>Missing values filled with the column median</li>
+                            <li>SMOTE inside the training partition only</li>
+                            <li>All six vetting-derived columns removed</li>
+                            <li>Macro F1 .75 · AUC .961 (CONFIRMED vs rest)</li>
                         </ul>
                     </div>
                     <div class="model-footer">
-                        <span class="accuracy-label">Accuracy (Pure Physics)</span>
+                        <span class="accuracy-label">Test accuracy (no vetting)</span>
                         <span class="accuracy-val">79%</span>
                     </div>
                 </div>
 
-                <!-- XGBoost Physics Card -->
+                <!-- XGBoost Card -->
                 <div class="model-card">
                     <div>
                         <div class="model-header">
-                            <h4 class="model-name">XGBoost Pure Physics</h4>
-                            <span class="model-tag tag-physics">Astrophysical AI</span>
+                            <h4 class="model-name">XGBoost</h4>
+                            <span class="model-tag tag-physics">Gradient Boosting</span>
                         </div>
                         <p class="model-body">
-                            Gradient boosting on the 36 features. NASA's 4 leakage flags are removed, so the model has to rely on the transit, orbital and stellar parameters. Supports SHAP analysis to explain its decisions.
+                            Builds trees in sequence, each fitting the residuals of its predecessors. The configuration was fixed in advance and not tuned: multi:softprob, learning rate .08, max depth 6, 250 estimators.
                         </p>
                         <ul class="model-features-list">
-                            <li>Data-leakage protection (vetting flags removed)</li>
-                            <li>Learns from catalogue parameters, not raw light curves</li>
-                            <li>Can score KOIs that are still CANDIDATE (not yet vetted)</li>
-                            <li>Corrected SHAP: koi_model_snr &amp; koi_prad rank highest</li>
+                            <li>Highest AUC for CONFIRMED: .966</li>
+                            <li>Macro F1 .76 · five-fold CV .739 (SD = .012)</li>
+                            <li>Re-run on 3 feature sets × 2 label sets</li>
+                            <li>Recall: CANDIDATE .55 · CONFIRMED .85 · FP .88</li>
                         </ul>
                     </div>
                     <div class="model-footer">
-                        <span class="accuracy-label">Accuracy (Pure Physics)</span>
+                        <span class="accuracy-label">Test accuracy (no vetting)</span>
                         <span class="accuracy-val">79%</span>
                     </div>
                 </div>
@@ -134,17 +138,17 @@
                             <span class="model-tag tag-dl">Deep Learning</span>
                         </div>
                         <p class="model-body">
-                            A 1D convolutional neural network trained on the 36 Pure Physics features. Architecture: Conv1D(16→32) + MaxPool + Dense(64), designed to capture complex non-linear interactions between the physical parameters.
+                            Two convolutional blocks — Conv1d(1→16) and Conv1d(16→32) — with batch normalisation, ReLU and max pooling, then a 64-unit dense layer. Convolution runs along the 36-feature vector: a comparison under a fixed representation, not convolution over light curves.
                         </p>
                         <ul class="model-features-list">
-                            <li>Architecture: Conv1D(1→16→32) + BatchNorm + MaxPool</li>
-                            <li>Dropout (0.3) against overfitting</li>
-                            <li>Input: the 36 Pure Physics features (no fpflag columns)</li>
-                            <li>Convolves over the 36 table columns (no light-curve input)</li>
+                            <li>Adam, learning rate .0005, batch 64, 25 epochs</li>
+                            <li>Dropout .3 · gradient-norm clipping at 1.0</li>
+                            <li>CANDIDATE recall .62 exceeds its precision .50</li>
+                            <li>Four points below XGBoost (McNemar p &lt; .001)</li>
                         </ul>
                     </div>
                     <div class="model-footer">
-                        <span class="accuracy-label">Accuracy (Pure Physics DL)</span>
+                        <span class="accuracy-label">Test accuracy (no vetting)</span>
                         <span class="accuracy-val">75%</span>
                     </div>
                 </div>
@@ -164,18 +168,14 @@
 
                     <!-- Preset Selector -->
                     <div class="preset-section">
-                        <div class="preset-label">⚡ Quick-select a Kepler object or a hypothetical example:</div>
+                        <div class="preset-label">⚡ Quick-select a Kepler target or example:</div>
                         <div class="preset-buttons">
                             <button type="button" class="preset-btn active" data-preset="kepler-227b">🌟 Kepler-227 b</button>
                             <button type="button" class="preset-btn" data-preset="kepler-227c">🪐 Kepler-227 c</button>
                             <button type="button" class="preset-btn" data-preset="kepler-664b">✨ Kepler-664 b</button>
                             <button type="button" class="preset-btn" data-preset="false-binary">⚠️ K00753.01 (Binary)</button>
-                            <button type="button" class="preset-btn" data-preset="super-earth">🌍 Super-Earth (hypothetical)</button>
-                            <button type="button" class="preset-btn" data-preset="hot-jupiter">🔥 Hot Jupiter (hypothetical)</button>
-                        </div>
-                        <div id="preset-desc" class="input-desc" style="margin-top: 0.6rem;"></div>
-                        <div class="input-desc" style="margin-top: 0.4rem;">
-                            On this static page the trained models run only for the four real Kepler objects (outputs precomputed from the saved weights). The hypothetical examples and any slider change show a rule-based illustration instead, unless the Python backend (app.py) is running.
+                            <button type="button" class="preset-btn" data-preset="super-earth">🌍 Super-Earth (example)</button>
+                            <button type="button" class="preset-btn" data-preset="hot-jupiter">🔥 Hot Jupiter (example)</button>
                         </div>
                     </div>
 
@@ -274,7 +274,7 @@
                         </div>
                         <div class="prob-item">
                             <div class="prob-header">
-                                <span style="color: var(--status-candidate);">🔵 PLANETARY CANDIDATE (Potential candidate)</span>
+                                <span style="color: var(--status-candidate);">🔵 PLANETARY CANDIDATE (Vetting unfinished)</span>
                                 <span id="val-candidate">7.2%</span>
                             </div>
                             <div class="prob-track">
@@ -313,32 +313,32 @@
         </section>
 
         <!-- ==========================================================================
-             TAB 3: RESEARCH PLOTS GALLERY & SHAP
+             TAB 3: RESEARCH PLOTS GALLERY
              ========================================================================== -->
         <section id="tab-plots" class="tab-panel">
-            <h3 class="section-heading"><span>📊</span> Research Plots &amp; Explainable AI (SHAP)</h3>
+            <h3 class="section-heading"><span>📊</span> Research Plots</h3>
             <p style="color: var(--text-muted); margin-bottom: 2rem;">
-                Four high-resolution (600 DPI) figures from training and evaluating the models on the NASA Kepler dataset. The SHAP figure was regenerated in October 2026 after a plotting error was found (see figure 3). <strong style="color: var(--nasa-blue);">Click an image to enlarge it.</strong>
+                High-resolution (600 DPI) figures from training and evaluating the models on the NASA Kepler data. SHAP was applied during development, but its multi-class output was handled incorrectly and the figures proved unusable, so none is shown here (paper, Section 6). <strong style="color: var(--nasa-blue);">Click an image to enlarge it.</strong>
             </p>
 
             <div class="gallery-grid">
                 <!-- Plot 1: EDA -->
-                <div class="plot-card">
+                <div class="plot-card plot-wide">
                     <div class="plot-img-container">
-                        <img src="./exoplanet_research_plots/eda_exoplanet_analysis.png" alt="Exploratory Data Analysis Plot" loading="lazy">
+                        <img src="./exoplanet_research_plots/eda_exoplanet_analysis.png" alt="Label distribution and orbital period versus transit depth" loading="lazy">
                         <div class="plot-zoom-overlay">
                             <span class="zoom-icon">🔍 ENLARGE (600 DPI)</span>
                         </div>
                     </div>
                     <div class="plot-info">
                         <div>
-                            <h4 class="plot-title">1. Exploratory Data Analysis (EDA &amp; Physics)</h4>
+                            <h4 class="plot-title">1. Exploratory Data Analysis (EDA)</h4>
                             <p class="plot-desc">
-                                Overview of the three labels (FALSE POSITIVE is the largest class, because many signals come from impostor phenomena) and of the relationship between orbital period (koi_period) and transit depth (koi_depth).
+                                Distribution of the three dispositions and the relationship between orbital period (koi_period) and transit depth (koi_depth) across the 9,564 KOIs.
                             </p>
                         </div>
                         <div class="plot-insight">
-                            <span class="insight-tag">💡 Physics insight:</span> 98% of confirmed planets (dark blue) have a transit depth below 10,000 ppm (1%), and none is deeper than about 37,000 ppm. Deeper signals are mostly false positives (92%): since depth ≈ (R<sub>p</sub>/R<sub>★</sub>)², a much deeper dip needs an object too large to be a planet.
+                            <span class="insight-tag">💡 From the paper:</span> FALSE POSITIVE is the largest class (5,023 of 9,564, against 2,293 CONFIRMED and 2,248 CANDIDATE — Table 1). Shallow planetary transits and grazing eclipsing binaries occupy overlapping regions of parameter space, so no model reading these parameters can fully separate them.
                         </div>
                     </div>
                 </div>
@@ -346,62 +346,41 @@
                 <!-- Plot 2: ROC-AUC -->
                 <div class="plot-card">
                     <div class="plot-img-container">
-                        <img src="./exoplanet_research_plots/roc_auc_comparison.png" alt="ROC AUC Comparison Curves" loading="lazy">
+                        <img src="./exoplanet_research_plots/roc_auc_comparison.png" alt="One-versus-rest ROC curves for the CONFIRMED label" loading="lazy">
                         <div class="plot-zoom-overlay">
                             <span class="zoom-icon">🔍 ENLARGE (600 DPI)</span>
                         </div>
                     </div>
                     <div class="plot-info">
                         <div>
-                            <h4 class="plot-title">2. ROC-AUC Curve Comparison (Pure Physics)</h4>
+                            <h4 class="plot-title">2. ROC Curves for the CONFIRMED Label</h4>
                             <p class="plot-desc">
-                                Classification performance of the 3 model architectures on the 36 Pure Physics features, shown for the CONFIRMED class (one-vs-rest). All 3 models were trained under the same conditions: without NASA's vetting flags (fpflag).
+                                One-versus-rest ROC curves of the three models on the held-out test partition (n = 1,913), all trained without the vetting columns.
                             </p>
                         </div>
                         <div class="plot-insight">
-                            <span class="insight-tag">📈 ROC-AUC results:</span> Random Forest AUC = <strong>0.961</strong> &nbsp;|&nbsp; XGBoost AUC = <strong>0.966</strong> &nbsp;|&nbsp; 1D-CNN AUC = <strong>0.959</strong>. All 3 Pure Physics models separate confirmed planets from the other classes very well (AUC 0.959–0.966) without the vetting flags.
+                            <span class="insight-tag">📈 AUC:</span> XGBoost <strong>.966</strong> &nbsp;|&nbsp; Random forest <strong>.961</strong> &nbsp;|&nbsp; 1D-CNN <strong>.959</strong> (Table 3). Seven thousandths separate the three values and the curves lie almost on top of one another, while accuracy finds a four-point gap: architecture makes a small difference to hard classification and almost none to ranking.
                         </div>
                     </div>
                 </div>
 
-                <!-- Plot 3: SHAP Pure Physics (corrected) -->
+                <!-- Plot 3: Confusion Matrix -->
                 <div class="plot-card">
                     <div class="plot-img-container">
-                        <img src="./exoplanet_research_plots/shap_pure_physics.png" alt="Corrected SHAP summary of the Pure Physics XGBoost model" loading="lazy">
+                        <img src="./exoplanet_research_plots/confusion_matrix_errors.png" alt="Confusion matrix of the XGBoost classifier" loading="lazy">
                         <div class="plot-zoom-overlay">
                             <span class="zoom-icon">🔍 ENLARGE (600 DPI)</span>
                         </div>
                     </div>
                     <div class="plot-info">
                         <div>
-                            <h4 class="plot-title">3. Explainable AI - Corrected SHAP Summary (No NASA Flags)</h4>
+                            <h4 class="plot-title">3. Confusion Matrix — XGBoost (n = 1,913)</h4>
                             <p class="plot-desc">
-                                Mean |SHAP value| of each feature for the Pure Physics XGBoost model, split by class (the same 400 training rows as in the notebook). The original figure was drawn incorrectly: for a 3-class model the SHAP library returns a 3-D array, which the plotting call misread, so it showed only the first three table columns (<code>koi_period</code>, <code>koi_period_err1</code>, <code>koi_period_err2</code>). This figure was regenerated from the saved model in October 2026.
+                                XGBoost classified <strong>1,517 of 1,913</strong> test KOIs correctly (accuracy .79) and made <strong>396</strong> errors. Recall: <strong>CANDIDATE .55</strong>, <strong>CONFIRMED .85</strong>, <strong>FALSE POSITIVE .88</strong> (Table 4).
                             </p>
                         </div>
                         <div class="plot-insight">
-                            <span class="insight-tag">🌌 Analysis:</span> The model relies most on the transit signal-to-noise ratio (<code>koi_model_snr</code>) and the planet radius (<code>koi_prad</code>), followed by the uncertainties of stellar temperature and transit duration, the orbital period and the transit duration. Sky coordinates (<code>ra</code>, <code>dec</code>) also rank in the top 11, so not every signal the model uses is physical.
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Plot 4: Confusion Matrix -->
-                <div class="plot-card">
-                    <div class="plot-img-container">
-                        <img src="./exoplanet_research_plots/confusion_matrix_errors.png" alt="Confusion Matrix and Error Analysis" loading="lazy">
-                        <div class="plot-zoom-overlay">
-                            <span class="zoom-icon">🔍 ENLARGE (600 DPI)</span>
-                        </div>
-                    </div>
-                    <div class="plot-info">
-                        <div>
-                            <h4 class="plot-title">4. Error Analysis &amp; Confusion Matrix — XGBoost (1,913 test samples)</h4>
-                            <p class="plot-desc">
-                                Confusion matrix of the Pure Physics XGBoost model on the 1,913 test samples. Correctly classified: <strong>CANDIDATE 245/449</strong> (54.6%), <strong>CONFIRMED 390/459</strong> (85.0%), <strong>FALSE POSITIVE 882/1005</strong> (87.8%). Total misclassified: <strong>396 samples</strong>.
-                            </p>
-                        </div>
-                        <div class="plot-insight">
-                            <span class="insight-tag">🔬 Astrophysical analysis:</span> The largest confusion is CANDIDATE predicted as FALSE POSITIVE (<strong>137 cases</strong>) — eclipsing binary stars produce V-shaped dips that resemble the U-shaped transit of an exoplanet, a natural limit for current ML.
+                            <span class="insight-tag">🔬 From the paper:</span> almost everything goes wrong on CANDIDATE — of 449 instances the model kept 245, promoted 67 and demoted 137. CANDIDATE marks a signal whose vetting has not finished, so the label does not behave as a physical category, and some of the 67 promotions may anticipate confirmations rather than errors.
                         </div>
                     </div>
                 </div>
@@ -412,103 +391,151 @@
              TAB 4: DATA LEAKAGE DEEP DIVE
              ========================================================================== -->
         <section id="tab-leakage" class="tab-panel">
-            <h3 class="section-heading"><span>🔬</span> Scientific Deep Dive: Data Leakage &amp; Physics-Based AI</h3>
+            <h3 class="section-heading"><span>🔬</span> Scientific Deep Dive: Label Leakage vs. Label-Set Choice</h3>
 
             <div class="leakage-container">
-                <!-- Step 1: The Illusion -->
+                <!-- Step 1: The problem -->
                 <div class="leakage-card highlight-red">
                     <h4 class="leakage-step-title" style="color: var(--status-false-pos);">
-                        <span>🚨</span> 1. The 98.24% Illusion — Data Leakage in the NASA Archive
+                        <span>🚨</span> 1. Why Published Accuracies Disagree — Label Leakage
                     </h4>
                     <p class="leakage-text">
-                        In the initial experimental version (43 features), the model reached <strong>98.24%</strong> accuracy and a ROC-AUC of about 0.999. But it was not learning physics: it was relying on 4 false-positive flags that are outputs of NASA's own vetting (the automated <strong>Robovetter</strong>) — the same process that assigns the labels — so the model was partly reading the answer:
+                        Published accuracies on the KOI catalogue range from below .80 to above .98. Six columns of the cumulative KOI table encode the outcome of NASA's automated vetting (the <strong>Robovetter</strong>) rather than a property of the object. The target, <code>koi_disposition</code>, is produced by the same procedure, so a model given these columns predicts an outcome from its own antecedents — <strong>label leakage</strong> in its textbook form. The highest catalogue-based figure, <strong>98%</strong> (Sturrock et al.), was a two-class result (CONFIRMED vs FALSE POSITIVE, CANDIDATE held out) with the four flags still in the feature set.
                     </p>
                     <div class="flag-box-grid">
                         <div class="flag-box">
                             <div class="flag-name">🚩 koi_fpflag_nt</div>
-                            <div class="flag-desc">Not Transit-Like Flag (the signal does not look like a transit)</div>
+                            <div class="flag-desc">Not transit-like</div>
                         </div>
                         <div class="flag-box">
                             <div class="flag-name">🚩 koi_fpflag_ss</div>
-                            <div class="flag-desc">Stellar Eclipse Flag (eclipsing binary star signature)</div>
+                            <div class="flag-desc">Stellar eclipse</div>
                         </div>
                         <div class="flag-box">
                             <div class="flag-name">🚩 koi_fpflag_co</div>
-                            <div class="flag-desc">Centroid Offset Flag (the dip is offset from the target star)</div>
+                            <div class="flag-desc">Centroid offset</div>
                         </div>
                         <div class="flag-box">
                             <div class="flag-name">🚩 koi_fpflag_ec</div>
-                            <div class="flag-desc">Ephemeris Match Flag (same period and epoch as another, contaminating source)</div>
+                            <div class="flag-desc">Ephemeris match indicating contamination</div>
+                        </div>
+                        <div class="flag-box">
+                            <div class="flag-name">🚩 koi_score</div>
+                            <div class="flag-desc">Disposition score of the vetting pipeline</div>
+                        </div>
+                        <div class="flag-box">
+                            <div class="flag-name">🚩 koi_pdisposition</div>
+                            <div class="flag-desc">Pipeline disposition (the vetting verdict)</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Step 2: The Solution -->
+                <!-- Step 2: The design -->
                 <div class="leakage-card highlight-green">
                     <h4 class="leakage-step-title" style="color: var(--status-confirmed);">
-                        <span>✅</span> 2. The Fix: All 3 Models on the Pure Physics Benchmark
+                        <span>✅</span> 2. One Design, Two Factors
                     </h4>
                     <p class="leakage-text">
-                        To keep the science sound, we removed the 4 leakage flags from the <strong>entire training pipeline</strong> — for Random Forest, XGBoost and the PyTorch 1D-CNN alike. All 3 models were retrained on the <strong>36 remaining transit, orbital &amp; stellar features</strong>.
+                        With all six vetting-derived columns withheld and all three labels kept, random forest and XGBoost reach <strong>.79</strong> and the 1D-CNN <strong>.75</strong>: roughly four fifths of KOI dispositions are recoverable from astrophysical and stellar parameters alone. The XGBoost configuration was then re-estimated across three feature sets and two label sets on the same split, seed and hyperparameters (table below):
                     </p>
-                    <p class="leakage-text">
-                        Result: a corrected SHAP analysis (October 2026) shows which inputs the XGBoost model relies on most:
-                    </p>
-                    <ul class="model-features-list" style="max-width: 600px; margin-top: 1rem;">
-                        <li style="font-size: 1rem;">📶 <strong>koi_model_snr</strong> <span>(transit signal-to-noise ratio): the strongest single input.</span></li>
-                        <li style="font-size: 1rem;">🪐 <strong>koi_prad, koi_period</strong> <span>(planet radius, orbital period): physical properties of the candidate planet.</span></li>
-                        <li style="font-size: 1rem;">📏 <strong>koi_steff_err1, koi_duration_err1</strong> <span>(measurement uncertainties): catalogue properties rather than physics. Like the sky coordinates ra and dec in the top 11, they show that a model can also pick up non-physical cues.</span></li>
+                    <ul class="paper-list">
+                        <li>Restoring the four flags raises three-class accuracy from <strong>.793 to .907</strong>; restricting the same 36 features to CONFIRMED vs FALSE POSITIVE raises it to <strong>.939</strong>.</li>
+                        <li>The cell matching the design of Sturrock et al. (four flags, two labels) reaches <strong>.994</strong> — above the 98% that study reported, so the published figure is reproducible and its distance from .79 is a matter of design alone.</li>
+                        <li>Averaged over both orders, <strong>11.7</strong> of the <strong>20.1</strong> accuracy points belong to the label set and <strong>8.5</strong> to the four flags: the label set is the larger term.</li>
+                        <li>koi_score and koi_pdisposition add only <strong>.018</strong> (three-class) and <strong>.003</strong> (binary) once the flags are present.</li>
                     </ul>
+                    <p class="leakage-text" style="margin-top: 1.4rem; margin-bottom: 0;">
+                        Accuracy on the KOI catalogue is therefore not interpretable unless both the feature set and the label set are disclosed.
+                    </p>
                 </div>
 
-                <!-- Comparison Table -->
+                <!-- Table 5 -->
                 <div class="leakage-card">
                     <h4 class="leakage-step-title" style="color: var(--nasa-blue);">
-                        <span>⚖️</span> Detailed Comparison of the Two Approaches
+                        <span>⚖️</span> Accuracy Across Three Feature Sets and Two Label Sets (XGBoost)
                     </h4>
                     <div class="table-wrapper">
-                        <table class="leakage-table">
+                        <table class="leakage-table compact">
                             <thead>
                                 <tr>
-                                    <th>Criterion</th>
-                                    <th>Old version — 43 features (with NASA flags)</th>
-                                    <th>New version — 36 features (Pure Physics ✅)</th>
+                                    <th>Cell</th>
+                                    <th>Feature set</th>
+                                    <th>Labels</th>
+                                    <th>Accuracy</th>
+                                    <th>Macro F1</th>
+                                    <th>Increment</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td><strong>Number of input features</strong></td>
-                                    <td class="acc-fake">43 features (including the 4 fpflag columns)</td>
-                                    <td class="acc-real">36 features (no vetting flags)</td>
+                                <tr class="row-ref">
+                                    <td><strong>A1</strong></td>
+                                    <td>36 columns, no vetting</td>
+                                    <td>Three</td>
+                                    <td class="num">.793</td>
+                                    <td class="num">.758</td>
+                                    <td>reference</td>
                                 </tr>
                                 <tr>
-                                    <td><strong>Accuracy (RF / XGB / CNN)</strong></td>
-                                    <td class="acc-fake">98.24% / — / — (RF, inflated by fpflag)</td>
-                                    <td class="acc-real">79% / 79% / 75% (consistent, no flags)</td>
+                                    <td><strong>A2</strong></td>
+                                    <td>36 + four false-positive flags</td>
+                                    <td>Three</td>
+                                    <td class="num">.907</td>
+                                    <td class="num">.878</td>
+                                    <td class="inc">+.114 over A1</td>
                                 </tr>
                                 <tr>
-                                    <td><strong>Top SHAP feature</strong></td>
-                                    <td>Not measured reliably (the original SHAP plots were drawn incorrectly)</td>
-                                    <td><code>koi_model_snr</code> (transit signal-to-noise ratio; corrected SHAP)</td>
+                                    <td><strong>A3</strong></td>
+                                    <td>36 + four flags + koi_score + koi_pdisposition</td>
+                                    <td>Three</td>
+                                    <td class="num">.925</td>
+                                    <td class="num">.897</td>
+                                    <td class="inc">+.018 over A2</td>
                                 </tr>
                                 <tr>
-                                    <td><strong>What the AI learns</strong></td>
-                                    <td>RF memorizes the vetting flags (data leakage)</td>
-                                    <td>All 3 models learn from transit, orbital &amp; stellar parameters (plus some catalogue artefacts)</td>
+                                    <td><strong>B1</strong></td>
+                                    <td>36 columns, no vetting</td>
+                                    <td>Two</td>
+                                    <td class="num">.939</td>
+                                    <td class="num">.930</td>
+                                    <td class="inc">+.146 over A1</td>
+                                </tr>
+                                <tr class="row-sturrock">
+                                    <td><strong>B2</strong></td>
+                                    <td>36 + four false-positive flags</td>
+                                    <td>Two</td>
+                                    <td class="num">.994</td>
+                                    <td class="num">.993</td>
+                                    <td class="inc">+.055 over B1</td>
                                 </tr>
                                 <tr>
-                                    <td><strong>Usable on not-yet-vetted data</strong></td>
-                                    <td style="color: var(--status-false-pos); font-weight: 600;">❌ RF fails (depends on the vetting flags)</td>
-                                    <td style="color: var(--status-confirmed); font-weight: 600;">✅ All 3 models work without vetting flags</td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Use for future missions (TESS, PLATO)</strong></td>
-                                    <td style="color: var(--status-false-pos);">❌ Not feasible</td>
-                                    <td style="color: var(--star-gold);">⚠️ Possible in principle, after retraining on that mission's data</td>
+                                    <td><strong>B3</strong></td>
+                                    <td>36 + four flags + koi_score + koi_pdisposition</td>
+                                    <td>Two</td>
+                                    <td class="num">.997</td>
+                                    <td class="num">.997</td>
+                                    <td class="inc">+.003 over B2</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
+                    <p class="table-note">
+                        All six cells use the identical stratified split, seed, imputation and hyperparameters; only the columns supplied and the labels retained differ. Binary cells exclude CANDIDATE records from both partitions (test n = 1,464 against 1,913), so levels are not directly comparable across label sets and the increments carry the argument. Cell B2 corresponds to the design of Sturrock et al. (paper, Table 5).
+                    </p>
+                </div>
+
+                <!-- Limitations -->
+                <div class="leakage-card">
+                    <h4 class="leakage-step-title" style="color: var(--text-main);">
+                        <span>📌</span> 3. What the Results Do Not Support
+                    </h4>
+                    <ul class="paper-list">
+                        <li><strong>Host-star split:</strong> 23.9% of records share a host star with another record. A split grouped by Kepler Input Catalog ID gives accuracy .779 and macro F1 .748 (against .793 and .758) — real leakage, but worth only about 1.4 points.</li>
+                        <li><strong>Measurement uncertainties:</strong> dropping every uncertainty column (leaving 16 features) lowers accuracy from .793 to .764 and macro F1 from .758 to .733 — a residual channel worth about three points.</li>
+                        <li><strong>Cross-validation:</strong> in the five-fold check (macro F1 .739, SD = .012), feature scaling was estimated across the complete dataset and no resampling was applied inside the folds.</li>
+                        <li><strong>Interpretability:</strong> SHAP was applied during development, but the multi-class output was handled incorrectly and the figures proved unusable; a corrected per-class analysis is the natural next step.</li>
+                        <li><strong>Representation:</strong> the 1D-CNN operated on a tabular vector rather than on photometry, so the comparison with light-curve architectures remains indirect.</li>
+                        <li><strong>Snapshot:</strong> a single catalogue snapshot was used; repeating the analysis on a later release would separate genuine misclassification from anticipation of reclassification.</li>
+                    </ul>
                 </div>
             </div>
         </section>
@@ -519,7 +546,7 @@
         <section id="tab-weights" class="tab-panel">
             <h3 class="section-heading"><span>📁</span> System Architecture &amp; Packaged Model Weights</h3>
             <p style="color: var(--text-muted); margin-bottom: 2rem;">
-                The models were trained in a Kaggle notebook (the recorded run used the CPU) and exported to the <code style="color: var(--nasa-blue); background: #f1f5f9; padding: 0.2rem 0.5rem; border-radius: 4px;">./weight/</code> folder, ready to plug into real-time observation pipelines or a REST API backend.
+                The models were trained in a Kaggle notebook and exported to the <code style="color: var(--nasa-blue); background: #f1f5f9; padding: 0.2rem 0.5rem; border-radius: 4px;">./weight/</code> folder, ready to plug into real-time observation pipelines or a REST API backend.
             </p>
 
             <div class="weights-grid">
@@ -528,7 +555,7 @@
                     <div class="weight-icon">🌲</div>
                     <div class="weight-details">
                         <div class="weight-filename">random_forest_baseline.pkl</div>
-                        <div class="weight-meta">100-tree random forest — Pure Physics, 36 features (scikit-learn, joblib).</div>
+                        <div class="weight-meta">100-tree random forest on the 36 features without vetting columns (scikit-learn, joblib).</div>
                         <span class="weight-size-badge">📦 Size: 24.2 MB</span>
                     </div>
                 </div>
@@ -538,7 +565,7 @@
                     <div class="weight-icon">⚡</div>
                     <div class="weight-details">
                         <div class="weight-filename">xgboost_physics_model.json</div>
-                        <div class="weight-meta">Pure Physics XGBoost model (native XGBoost JSON booster).</div>
+                        <div class="weight-meta">XGBoost model on the same 36 features (native XGBoost JSON booster).</div>
                         <span class="weight-size-badge">📦 Size: 3.96 MB</span>
                     </div>
                 </div>
@@ -558,7 +585,7 @@
                     <div class="weight-icon">⚖️</div>
                     <div class="weight-details">
                         <div class="weight-filename">scaler_main.pkl</div>
-                        <div class="weight-meta">Z-score StandardScaler fitted on the training set (corrected in October 2026: the earlier file had been refit on the full dataset).</div>
+                        <div class="weight-meta">Z-score StandardScaler fitted on the training partition only.</div>
                         <span class="weight-size-badge">📦 Size: 2.2 KB</span>
                     </div>
                 </div>
@@ -587,7 +614,7 @@
     <!-- Footer -->
     <footer class="footer">
         <p>🌌 <span class="footer-highlight">ExoHunt AI - NASA Exoplanet Research</span> &mdash; Built on data from NASA's Kepler mission.</p>
-        <p style="margin-top: 0.4rem;">Research team: Dang D. T. (Đặng Đức Thanh), Pham H. B. C., Nguyen M. D. &amp; Trinh T. D. · Web app: Đặng Đức Thanh</p>
+        <p style="margin-top: 0.4rem;">Authors: Đặng Đức Thanh, Pham Hoang Bao Chau, Nguyen Minh Duc &amp; Trinh Thanh Do (corresponding author) · Web app: Đặng Đức Thanh</p>
         <p style="margin-top: 0.4rem; font-size: 0.8rem;">Optimized for web browsers &amp; real-time machine-learning classification.</p>
     </footer>
 
