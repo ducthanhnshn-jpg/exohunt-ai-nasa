@@ -1,6 +1,6 @@
 # ==============================================================================
 # ExoHunt AI - NASA Exoplanet Discovery Engine (Requirements)
-# Danh sách thư viện cần thiết cho Backend Server & Machine Learning Pipeline
+# Libraries needed for the backend server & the machine-learning pipeline
 # ==============================================================================
 
 # Web Server & REST API Framework
@@ -9,16 +9,19 @@ uvicorn>=0.22.0
 pydantic>=2.0.0
 
 # Machine Learning & Data Processing
-# QUAN TRỌNG: Phải dùng scikit-learn >= 1.6.0 để tương thích với trọng số Random Forest từ Kaggle
-# (Phiên bản cũ như 1.0.2 sẽ báo lỗi incompatible dtype 'missing_go_to_left')
+# IMPORTANT: scikit-learn >= 1.6.0 is required to load the Random Forest weights trained on Kaggle
+# (older versions such as 1.0.2 fail with an incompatible dtype error about 'missing_go_to_left')
 scikit-learn>=1.6.0
-xgboost>=2.0.0
+# The saved XGBoost model was written by XGBoost 3.2.0; older versions may not be able to load it
+xgboost>=3.2.0
 pandas>=2.0.0
 numpy>=1.24.0
 joblib>=1.3.0
+# SMOTE class balancing used in the notebook (0.13+ works with scikit-learn 1.6)
+imbalanced-learn>=0.13.0
 
 # Deep Learning (PyTorch 1D-CNN)
-# Lưu ý cho Windows: Nếu gặp lỗi WinError 127 c10_cuda.dll, hãy cài bản CPU-only:
+# Note for Windows: if you get the WinError 127 c10_cuda.dll error, install the CPU-only build:
 # pip uninstall torch torchvision torchaudio -y
 # pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 torch>=2.0.0

@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🌌 ExoHunt AI - NASA Kepler Exoplanet Discovery Engine</title>
-    <meta name="description" content="Ứng dụng AI Trí tuệ Nhân tạo khám phá Ngoại hành tinh từ dữ liệu Kính viễn vọng Không gian NASA Kepler. So sánh mô hình Random Forest, XGBoost Vật lý và PyTorch 1D-CNN.">
+    <meta name="description" content="AI that classifies exoplanet signals from NASA's Kepler Space Telescope data. Compares Random Forest, Physics XGBoost and a PyTorch 1D-CNN.">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -20,18 +20,18 @@
         <div class="nav-status">
             <div class="status-badge">
                 <span class="pulse-dot"></span>
-                <span>Hệ thống Trực tuyến - Sẵn sàng Suy luận AI</span>
+                <span id="status-text">Static demo · precomputed model outputs</span>
             </div>
         </div>
     </header>
 
     <!-- Navigation Tabs -->
     <nav class="nav-tabs" id="main-nav-tabs">
-        <button type="button" class="tab-btn active" data-tab="tab-dashboard">🔭 Bảng điều khiển</button>
-        <button type="button" class="tab-btn" data-tab="tab-playground">🤖 Giả lập Nhận diện AI</button>
-        <button type="button" class="tab-btn" data-tab="tab-plots">📊 Phân tích Khoa học & SHAP</button>
-        <button type="button" class="tab-btn" data-tab="tab-leakage">🔬 Đào sâu Rò rỉ Dữ liệu</button>
-        <button type="button" class="tab-btn" data-tab="tab-weights">📁 Kiến trúc & Trọng số</button>
+        <button type="button" class="tab-btn active" data-tab="tab-dashboard">🔭 Dashboard</button>
+        <button type="button" class="tab-btn" data-tab="tab-playground">🤖 AI Classification Demo</button>
+        <button type="button" class="tab-btn" data-tab="tab-plots">📊 Research Plots &amp; SHAP</button>
+        <button type="button" class="tab-btn" data-tab="tab-leakage">🔬 Data Leakage Deep Dive</button>
+        <button type="button" class="tab-btn" data-tab="tab-weights">📁 Architecture &amp; Weights</button>
     </nav>
 
     <!-- Main Container -->
@@ -41,9 +41,9 @@
              ========================================================================== -->
         <section id="tab-dashboard" class="tab-panel active">
             <div class="hero-banner">
-                <h2 class="hero-title">Khám Phá Ngoại Hành Tinh Bằng Trí Tuệ Nhân Tạo Từ Dữ Liệu Kính Viễn Vọng Không Gian NASA Kepler</h2>
+                <h2 class="hero-title">Exploring Exoplanets with Artificial Intelligence Using NASA Kepler Space Telescope Data</h2>
                 <p class="hero-desc">
-                    Hệ thống AI đa kiến trúc kết hợp Machine Learning truyền thống (Random Forest, XGBoost) và Deep Learning (PyTorch 1D-CNN) nhằm giải mã tín hiệu suy giảm ánh sáng từ 9,564 mục tiêu Kepler, nhận diện hành tinh sống được và loại bỏ hiện tượng sao đôi giả mạo.
+                    A multi-architecture AI system that combines classical machine learning (Random Forest, XGBoost) with deep learning (a PyTorch 1D-CNN) to classify the transit signals of 9,564 Kepler Objects of Interest and to separate real planets from false positives such as eclipsing binary stars.
                 </p>
             </div>
 
@@ -52,30 +52,30 @@
                 <div class="stat-card">
                     <span class="stat-icon">🪐</span>
                     <div class="stat-value">9,564</div>
-                    <div class="stat-label">Mục tiêu Kepler (KOI)</div>
-                    <div class="stat-sub">Dữ liệu quan trắc từ NASA Exoplanet Archive</div>
+                    <div class="stat-label">Kepler Objects of Interest (KOIs)</div>
+                    <div class="stat-sub">Observations from the NASA Exoplanet Archive</div>
                 </div>
                 <div class="stat-card">
                     <span class="stat-icon">🧬</span>
                     <div class="stat-value">36</div>
-                    <div class="stat-label">Đặc trưng Vật lý Thuần túy</div>
-                    <div class="stat-sub">Bán kính, Chu kỳ, Độ sâu, Trọng trường, Nhiệt độ (Pure Physics)</div>
+                    <div class="stat-label">Features Without Vetting Flags</div>
+                    <div class="stat-sub">Radius, period, depth, surface gravity, temperature… (Pure Physics)</div>
                 </div>
                 <div class="stat-card">
                     <span class="stat-icon">⚡</span>
-                    <div class="stat-value">3 Mô hình</div>
+                    <div class="stat-value">3 Models</div>
                     <div class="stat-label">Pure Physics Benchmark</div>
                     <div class="stat-sub">Random Forest | XGBoost | PyTorch 1D-CNN</div>
                 </div>
                 <div class="stat-card">
                     <span class="stat-icon">🎯</span>
                     <div class="stat-value">75% - 79%</div>
-                    <div class="stat-label">Độ chính xác Thuần Vật lý</div>
-                    <div class="stat-sub">Không rò rỉ dữ liệu · Benchmark khoa học chuẩn mực</div>
+                    <div class="stat-label">Pure Physics Test Accuracy</div>
+                    <div class="stat-sub">No vetting-flag leakage · 3 classes · 1,913 test KOIs</div>
                 </div>
             </div>
 
-            <h3 class="section-heading"><span>⚙️</span> Kiến trúc Mô hình Đã Huấn luyện & Đánh giá</h3>
+            <h3 class="section-heading"><span>⚙️</span> Trained &amp; Evaluated Model Architectures</h3>
             <div class="models-grid">
                 <!-- Random Forest Card -->
                 <div class="model-card">
@@ -85,13 +85,13 @@
                             <span class="model-tag tag-physics">Pure Physics</span>
                         </div>
                         <p class="model-body">
-                            Rừng cây quyết định 100 cây, huấn luyện lại trên 36 đặc trưng vật lý thuần túy sau khi loại bỏ hoàn toàn 4 cờ thẩm định của NASA. Mô hình baseline đã được nâng cấp lên chuẩn Pure Physics.
+                            A 100-tree random forest, retrained on the 36 features after completely removing NASA's 4 vetting flags. The baseline model now follows the Pure Physics setup.
                         </p>
                         <ul class="model-features-list">
-                            <li>Xử lý Missing Values tự động bằng Median Imputer</li>
-                            <li>Cân bằng dữ liệu với kỹ thuật SMOTE</li>
-                            <li>Đã loại bỏ hoàn toàn 4 cờ fpflag (Pure Physics)</li>
-                            <li>Huấn luyện trên 36 đặc trưng quang học &amp; quỹ đạo</li>
+                            <li>Missing values filled automatically with a median imputer</li>
+                            <li>Class balancing with SMOTE</li>
+                            <li>All 4 fpflag columns removed (Pure Physics)</li>
+                            <li>Trained on 36 transit, orbital &amp; stellar features</li>
                         </ul>
                     </div>
                     <div class="model-footer">
@@ -108,13 +108,13 @@
                             <span class="model-tag tag-physics">Astrophysical AI</span>
                         </div>
                         <p class="model-body">
-                            Gradient Boosting tối ưu trên 36 đặc trưng vật lý. Loại bỏ 4 cờ gian lận NASA, ép AI tự học định luật quá cảnh Kepler. Hỗ trợ phân tích SHAP để giải thích quyết định minh bạch.
+                            Gradient boosting on the 36 features. NASA's 4 leakage flags are removed, so the model has to rely on the transit, orbital and stellar parameters. Supports SHAP analysis to explain its decisions.
                         </p>
                         <ul class="model-features-list">
-                            <li>Chống rò rỉ dữ liệu (Data Leakage Protection)</li>
-                            <li>Tự học định luật Kepler từ dữ liệu thô quang học</li>
-                            <li>Phát hiện ngoại hành tinh mới chưa được thẩm định</li>
-                            <li>Giải thích bằng SHAP: koi_srad &amp; koi_depth đứng đầu</li>
+                            <li>Data-leakage protection (vetting flags removed)</li>
+                            <li>Learns from catalogue parameters, not raw light curves</li>
+                            <li>Can score KOIs that are still CANDIDATE (not yet vetted)</li>
+                            <li>Corrected SHAP: koi_model_snr &amp; koi_prad rank highest</li>
                         </ul>
                     </div>
                     <div class="model-footer">
@@ -131,13 +131,13 @@
                             <span class="model-tag tag-dl">Deep Learning</span>
                         </div>
                         <p class="model-body">
-                            Mạng nơ-ron tích chập 1D huấn luyện trên 36 đặc trưng Pure Physics. Kiến trúc tối ưu hóa: Conv1D(16→32) + MaxPool + Dense(64), phát hiện tương tác phi tuyến tính phức tạp giữa các thông số vật lý.
+                            A 1D convolutional neural network trained on the 36 Pure Physics features. Architecture: Conv1D(16→32) + MaxPool + Dense(64), designed to capture complex non-linear interactions between the physical parameters.
                         </p>
                         <ul class="model-features-list">
-                            <li>Kiến trúc tối ưu: Conv1D(1→16→32) + BatchNorm + MaxPool</li>
-                            <li>Lớp Dropout (0.3) chống học vẹt (Overfitting)</li>
-                            <li>Đầu vào: 36 đặc trưng Pure Physics (không có cờ fpflag)</li>
-                            <li>Tối ưu cho phát hiện tín hiệu quá cảnh mờ nhạt</li>
+                            <li>Architecture: Conv1D(1→16→32) + BatchNorm + MaxPool</li>
+                            <li>Dropout (0.3) against overfitting</li>
+                            <li>Input: the 36 Pure Physics features (no fpflag columns)</li>
+                            <li>Convolves over the 36 table columns (no light-curve input)</li>
                         </ul>
                     </div>
                     <div class="model-footer">
@@ -152,94 +152,98 @@
              TAB 2: INFERENCE PLAYGROUND (A/B TESTING)
              ========================================================================== -->
         <section id="tab-playground" class="tab-panel">
-            <h3 class="section-heading"><span>🤖</span> Giả lập Nhận diện Ngoại hành tinh Thời gian thực (A/B Testing)</h3>
-            
+            <h3 class="section-heading"><span>🤖</span> Interactive Exoplanet Classification Demo (A/B Testing)</h3>
+
             <div class="playground-grid">
                 <!-- Left Column: Telemetry Controls -->
                 <div class="panel-card">
-                    <h4 class="panel-title"><span>🎛️</span> Thông số Quan trắc Đầu vào (Stellar Telemetry)</h4>
-                    
+                    <h4 class="panel-title"><span>🎛️</span> Input Parameters (Stellar Telemetry)</h4>
+
                     <!-- Preset Selector -->
                     <div class="preset-section">
-                        <div class="preset-label">⚡ Chọn nhanh Mục tiêu Kepler nổi tiếng:</div>
+                        <div class="preset-label">⚡ Quick-select a Kepler object or a hypothetical example:</div>
                         <div class="preset-buttons">
                             <button type="button" class="preset-btn active" data-preset="kepler-227b">🌟 Kepler-227 b</button>
                             <button type="button" class="preset-btn" data-preset="kepler-227c">🪐 Kepler-227 c</button>
                             <button type="button" class="preset-btn" data-preset="kepler-664b">✨ Kepler-664 b</button>
-                            <button type="button" class="preset-btn" data-preset="false-binary">⚠️ K00753.01 (Sao đôi)</button>
-                            <button type="button" class="preset-btn" data-preset="super-earth">🌍 Siêu Trái Đất</button>
-                            <button type="button" class="preset-btn" data-preset="hot-jupiter">🔥 Hot Jupiter</button>
+                            <button type="button" class="preset-btn" data-preset="false-binary">⚠️ K00753.01 (Binary)</button>
+                            <button type="button" class="preset-btn" data-preset="super-earth">🌍 Super-Earth (hypothetical)</button>
+                            <button type="button" class="preset-btn" data-preset="hot-jupiter">🔥 Hot Jupiter (hypothetical)</button>
+                        </div>
+                        <div id="preset-desc" class="input-desc" style="margin-top: 0.6rem;"></div>
+                        <div class="input-desc" style="margin-top: 0.4rem;">
+                            On this static page the trained models run only for the four real Kepler objects (outputs precomputed from the saved weights). The hypothetical examples and any slider change show a rule-based illustration instead, unless the Python backend (app.py) is running.
                         </div>
                     </div>
 
                     <!-- Sliders -->
                     <div class="slider-group">
-                        <!-- Bán kính sao chủ -->
+                        <!-- Host-star radius -->
                         <div class="input-row">
                             <div class="input-header">
-                                <span class="input-label">☀️ Bán kính Sao chủ (koi_srad)</span>
-                                <span class="input-val-display" id="slider-srad-val">1.01 R_sun</span>
+                                <span class="input-label">☀️ Host-Star Radius (koi_srad)</span>
+                                <span class="input-val-display" id="slider-srad-val">0.927 R_sun</span>
                             </div>
-                            <input type="range" id="slider-srad" class="telemetry-slider" min="0.1" max="5.0" step="0.05" value="1.01" data-unit=" R_sun">
-                            <div class="input-desc">Kích thước ngôi sao so với Mặt Trời (Mặt trời = 1.0 R_sun).</div>
+                            <input type="range" id="slider-srad" class="telemetry-slider" min="0.1" max="5.0" step="0.05" value="0.927" data-unit=" R_sun">
+                            <div class="input-desc">Size of the star relative to the Sun (Sun = 1.0 R_sun).</div>
                         </div>
 
-                        <!-- Độ sâu quá cảnh -->
+                        <!-- Transit depth -->
                         <div class="input-row">
                             <div class="input-header">
-                                <span class="input-label">📉 Độ sâu Quá cảnh (koi_depth)</span>
-                                <span class="input-val-display" id="slider-depth-val">269.4 ppm</span>
+                                <span class="input-label">📉 Transit Depth (koi_depth)</span>
+                                <span class="input-val-display" id="slider-depth-val">615.8 ppm</span>
                             </div>
-                            <input type="range" id="slider-depth" class="telemetry-slider" min="10" max="15000" step="50" value="269.4" data-unit=" ppm">
-                            <div class="input-desc">Mức độ sụt giảm ánh sáng khi hành tinh che khuất (parts per million).</div>
+                            <input type="range" id="slider-depth" class="telemetry-slider" min="10" max="15000" step="50" value="615.8" data-unit=" ppm">
+                            <div class="input-desc">How much the starlight dims while the planet passes in front (parts per million).</div>
                         </div>
 
-                        <!-- Chu kỳ quỹ đạo -->
+                        <!-- Orbital period -->
                         <div class="input-row">
                             <div class="input-header">
-                                <span class="input-label">🔄 Chu kỳ Quỹ đạo (koi_period)</span>
-                                <span class="input-val-display" id="slider-period-val">2.13 ngày</span>
+                                <span class="input-label">🔄 Orbital Period (koi_period)</span>
+                                <span class="input-val-display" id="slider-period-val">9.488 days</span>
                             </div>
-                            <input type="range" id="slider-period" class="telemetry-slider" min="0.5" max="365" step="0.5" value="2.13" data-unit=" ngày">
-                            <div class="input-desc">Thời gian hành tinh hoàn thành 1 vòng quay quanh sao chủ.</div>
+                            <input type="range" id="slider-period" class="telemetry-slider" min="0.5" max="365" step="0.5" value="9.488" data-unit=" days">
+                            <div class="input-desc">Time the planet takes to complete one orbit around its star.</div>
                         </div>
 
-                        <!-- Thời gian quá cảnh -->
+                        <!-- Transit duration -->
                         <div class="input-row">
                             <div class="input-header">
-                                <span class="input-label">⏱️ Thời gian Quá cảnh (koi_duration)</span>
-                                <span class="input-val-display" id="slider-duration-val">2.95 giờ</span>
+                                <span class="input-label">⏱️ Transit Duration (koi_duration)</span>
+                                <span class="input-val-display" id="slider-duration-val">2.958 hours</span>
                             </div>
-                            <input type="range" id="slider-duration" class="telemetry-slider" min="0.5" max="24" step="0.25" value="2.95" data-unit=" giờ">
-                            <div class="input-desc">Thời gian hành tinh đi ngang qua trước mặt sao chủ.</div>
+                            <input type="range" id="slider-duration" class="telemetry-slider" min="0.5" max="24" step="0.25" value="2.958" data-unit=" hours">
+                            <div class="input-desc">How long the planet takes to cross the face of its star.</div>
                         </div>
 
-                        <!-- Nhiệt độ sao chủ -->
+                        <!-- Stellar temperature -->
                         <div class="input-row">
                             <div class="input-header">
-                                <span class="input-label">🌡️ Nhiệt độ Bề mặt Sao (koi_steff)</span>
-                                <span class="input-val-display" id="slider-steff-val">5845 K</span>
+                                <span class="input-label">🌡️ Stellar Surface Temperature (koi_steff)</span>
+                                <span class="input-val-display" id="slider-steff-val">5455 K</span>
                             </div>
-                            <input type="range" id="slider-steff" class="telemetry-slider" min="3000" max="10000" step="100" value="5845" data-unit=" K">
-                            <div class="input-desc">Nhiệt độ hiệu dụng của sao chủ (Kelvin).</div>
+                            <input type="range" id="slider-steff" class="telemetry-slider" min="3000" max="10000" step="100" value="5455" data-unit=" K">
+                            <div class="input-desc">Effective temperature of the host star (kelvin).</div>
                         </div>
 
-                        <!-- Trọng trường -->
+                        <!-- Surface gravity -->
                         <div class="input-row">
                             <div class="input-header">
-                                <span class="input-label">🧲 Trọng trường Bề mặt (koi_slogg)</span>
-                                <span class="input-val-display" id="slider-slogg-val">4.47 log(g)</span>
+                                <span class="input-label">🧲 Surface Gravity (koi_slogg)</span>
+                                <span class="input-val-display" id="slider-slogg-val">4.467 log(g)</span>
                             </div>
-                            <input type="range" id="slider-slogg" class="telemetry-slider" min="3.0" max="5.5" step="0.05" value="4.47" data-unit=" log(g)">
-                            <div class="input-desc">Logarit gia tốc trọng trường trên bề mặt sao.</div>
+                            <input type="range" id="slider-slogg" class="telemetry-slider" min="3.0" max="5.5" step="0.05" value="4.467" data-unit=" log(g)">
+                            <div class="input-desc">Logarithm of the gravitational acceleration at the star's surface.</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Right Column: AI Inference & Visualization -->
                 <div class="panel-card">
-                    <h4 class="panel-title"><span>🧠</span> Bộ xử lý Nhận diện AI & XAI Rationale</h4>
-                    
+                    <h4 class="panel-title"><span>🧠</span> AI Classifier &amp; Result Details</h4>
+
                     <!-- Model Switcher -->
                     <div class="model-switcher">
                         <button type="button" class="switch-btn" data-model="Random Forest">🌲 Random Forest</button>
@@ -249,38 +253,38 @@
 
                     <!-- Prediction Banner -->
                     <div id="prediction-result-box" class="prediction-result-box confirmed">
-                        <div class="pred-status-label">KẾT QUẢ PHÂN LOẠI AI</div>
+                        <div id="pred-status-label" class="pred-status-label">AI CLASSIFICATION RESULT</div>
                         <div id="pred-main-title" class="pred-main-title">🌟 CONFIRMED EXOPLANET</div>
-                        <div id="pred-conf-score" class="pred-conf-score">Độ tự tin AI (XGBoost): 68.5%</div>
+                        <div id="pred-conf-score" class="pred-conf-score">AI confidence (XGBoost): 92.5%</div>
                     </div>
 
                     <!-- Probability Bars -->
                     <div class="prob-bars-container">
                         <div class="prob-item">
                             <div class="prob-header">
-                                <span style="color: var(--status-confirmed);">🟢 CONFIRMED EXOPLANET (Hành tinh thực)</span>
-                                <span id="val-confirmed">68.5%</span>
+                                <span style="color: var(--status-confirmed);">🟢 CONFIRMED EXOPLANET (Real planet)</span>
+                                <span id="val-confirmed">92.5%</span>
                             </div>
                             <div class="prob-track">
-                                <div id="bar-confirmed" class="prob-fill fill-confirmed" style="width: 68.5%;"></div>
+                                <div id="bar-confirmed" class="prob-fill fill-confirmed" style="width: 92.5%;"></div>
                             </div>
                         </div>
                         <div class="prob-item">
                             <div class="prob-header">
-                                <span style="color: var(--status-candidate);">🔵 PLANETARY CANDIDATE (Ứng viên tiềm năng)</span>
-                                <span id="val-candidate">21.5%</span>
+                                <span style="color: var(--status-candidate);">🔵 PLANETARY CANDIDATE (Potential candidate)</span>
+                                <span id="val-candidate">7.2%</span>
                             </div>
                             <div class="prob-track">
-                                <div id="bar-candidate" class="prob-fill fill-candidate" style="width: 21.5%;"></div>
+                                <div id="bar-candidate" class="prob-fill fill-candidate" style="width: 7.2%;"></div>
                             </div>
                         </div>
                         <div class="prob-item">
                             <div class="prob-header">
-                                <span style="color: var(--status-false-pos);">🔴 FALSE POSITIVE (Giả mạo / Sao đôi che khuất)</span>
-                                <span id="val-false-pos">10.0%</span>
+                                <span style="color: var(--status-false-pos);">🔴 FALSE POSITIVE (Impostor / eclipsing binary)</span>
+                                <span id="val-false-pos">0.2%</span>
                             </div>
                             <div class="prob-track">
-                                <div id="bar-false-pos" class="prob-fill fill-false-pos" style="width: 10.0%;"></div>
+                                <div id="bar-false-pos" class="prob-fill fill-false-pos" style="width: 0.2%;"></div>
                             </div>
                         </div>
                     </div>
@@ -288,17 +292,17 @@
                     <!-- Live Transit Lightcurve Simulator -->
                     <div class="lightcurve-box">
                         <div class="lightcurve-header">
-                            <span class="lightcurve-title">⚡ GIẢ LẬP ĐƯỜNG CONG ÁNH SÁNG QUÁ CẢNH (LIGHTCURVE)</span>
+                            <span class="lightcurve-title">⚡ SIMULATED TRANSIT LIGHT CURVE (ILLUSTRATION)</span>
                             <span style="font-size: 0.75rem; color: var(--text-dim);">Live Canvas Rendering</span>
                         </div>
                         <canvas id="lightcurve-canvas"></canvas>
                     </div>
 
-                    <!-- Explainable AI Box -->
+                    <!-- Result explanation box -->
                     <div class="xai-box">
-                        <div class="xai-title"><span>💡</span> Giải thích Quyết định AI (Explainable AI Rationale):</div>
+                        <div class="xai-title"><span>💡</span> How This Result Was Produced:</div>
                         <div id="xai-content" class="xai-content">
-                            Đang phân tích dữ liệu quan trắc từ Kepler...
+                            Loading the Kepler data…
                         </div>
                     </div>
                 </div>
@@ -309,9 +313,9 @@
              TAB 3: RESEARCH PLOTS GALLERY & SHAP
              ========================================================================== -->
         <section id="tab-plots" class="tab-panel">
-            <h3 class="section-heading"><span>📊</span> Thư viện Biểu đồ Phân tích Khoa học & Explainable AI (SHAP)</h3>
+            <h3 class="section-heading"><span>📊</span> Research Plots &amp; Explainable AI (SHAP)</h3>
             <p style="color: var(--text-muted); margin-bottom: 2rem;">
-                Toàn bộ 5 đồ thị chất lượng cao (600 DPI) được trích xuất trực tiếp từ quá trình huấn luyện và đánh giá trên tập dữ liệu NASA Kepler. <strong style="color: var(--nasa-blue);">Nhấp vào hình ảnh để phóng to chi tiết.</strong>
+                Four high-resolution (600 DPI) figures from training and evaluating the models on the NASA Kepler dataset. The SHAP figure was regenerated in October 2026 after a plotting error was found (see figure 3). <strong style="color: var(--nasa-blue);">Click an image to enlarge it.</strong>
             </p>
 
             <div class="gallery-grid">
@@ -320,18 +324,18 @@
                     <div class="plot-img-container">
                         <img src="./exoplanet_research_plots/eda_exoplanet_analysis.png" alt="Exploratory Data Analysis Plot" loading="lazy">
                         <div class="plot-zoom-overlay">
-                            <span class="zoom-icon">🔍 PHÓNG TO CHI TIẾT (600 DPI)</span>
+                            <span class="zoom-icon">🔍 ENLARGE (600 DPI)</span>
                         </div>
                     </div>
                     <div class="plot-info">
                         <div>
-                            <h4 class="plot-title">1. Trực quan hóa Khám phá Dữ liệu (EDA & Physics)</h4>
+                            <h4 class="plot-title">1. Exploratory Data Analysis (EDA &amp; Physics)</h4>
                             <p class="plot-desc">
-                                Phân tích toàn cảnh phân phối 3 nhãn (FALSE POSITIVE chiếm đa số do các hiện tượng vật lý giả mạo) và mối tương quan vật lý thiên văn giữa Chu kỳ quỹ đạo (koi_period) và Độ sâu quá cảnh (koi_depth).
+                                Overview of the three labels (FALSE POSITIVE is the largest class, because many signals come from impostor phenomena) and of the relationship between orbital period (koi_period) and transit depth (koi_depth).
                             </p>
                         </div>
                         <div class="plot-insight">
-                            <span class="insight-tag">💡 Phát hiện Vật lý:</span> Các hành tinh thực (Confirmed - màu xanh) có xu hướng tập trung ở vùng quỹ đạo ổn định và độ sâu tỷ lệ thuận với bán kính sao chủ.
+                            <span class="insight-tag">💡 Physics insight:</span> 98% of confirmed planets (dark blue) have a transit depth below 10,000 ppm (1%), and none is deeper than about 37,000 ppm. Deeper signals are mostly false positives (92%): since depth ≈ (R<sub>p</sub>/R<sub>★</sub>)², a much deeper dip needs an object too large to be a planet.
                         </div>
                     </div>
                 </div>
@@ -341,81 +345,60 @@
                     <div class="plot-img-container">
                         <img src="./exoplanet_research_plots/roc_auc_comparison.png" alt="ROC AUC Comparison Curves" loading="lazy">
                         <div class="plot-zoom-overlay">
-                            <span class="zoom-icon">🔍 PHÓNG TO CHI TIẾT (600 DPI)</span>
+                            <span class="zoom-icon">🔍 ENLARGE (600 DPI)</span>
                         </div>
                     </div>
                     <div class="plot-info">
                         <div>
-                            <h4 class="plot-title">2. So sánh Đường cong Đánh giá ROC-AUC (Pure Physics)</h4>
+                            <h4 class="plot-title">2. ROC-AUC Curve Comparison (Pure Physics)</h4>
                             <p class="plot-desc">
-                                Đánh giá hiệu lực phân loại của 3 kiến trúc mô hình trên tập 36 đặc trưng thuần vật lý. Cả 3 mô hình đều được huấn luyện trong điều kiện công bằng: không có cờ thẩm định thủ công của NASA (fpflag).
+                                Classification performance of the 3 model architectures on the 36 Pure Physics features, shown for the CONFIRMED class (one-vs-rest). All 3 models were trained under the same conditions: without NASA's vetting flags (fpflag).
                             </p>
                         </div>
                         <div class="plot-insight">
-                            <span class="insight-tag">📈 Kết quả ROC-AUC:</span> Random Forest AUC = <strong>0.961</strong> &nbsp;|&nbsp; XGBoost AUC = <strong>0.966</strong> &nbsp;|&nbsp; 1D-CNN AUC = <strong>0.959</strong>. Cả 3 mô hình Pure Physics đạt khả năng phân biệt tuyệt vời (AUC ≥ 0.96) khi chỉ dựa vào vật lý thiên văn!
+                            <span class="insight-tag">📈 ROC-AUC results:</span> Random Forest AUC = <strong>0.961</strong> &nbsp;|&nbsp; XGBoost AUC = <strong>0.966</strong> &nbsp;|&nbsp; 1D-CNN AUC = <strong>0.959</strong>. All 3 Pure Physics models separate confirmed planets from the other classes very well (AUC 0.959–0.966) without the vetting flags.
                         </div>
                     </div>
                 </div>
 
-                <!-- Plot 3: SHAP Baseline -->
+                <!-- Plot 3: SHAP Pure Physics (corrected) -->
                 <div class="plot-card">
                     <div class="plot-img-container">
-                        <img src="./exoplanet_research_plots/shap_feature_importance.png" alt="SHAP Feature Importance Baseline" loading="lazy">
+                        <img src="./exoplanet_research_plots/shap_pure_physics.png" alt="Corrected SHAP summary of the Pure Physics XGBoost model" loading="lazy">
                         <div class="plot-zoom-overlay">
-                            <span class="zoom-icon">🔍 PHÓNG TO CHI TIẾT (600 DPI)</span>
+                            <span class="zoom-icon">🔍 ENLARGE (600 DPI)</span>
                         </div>
                     </div>
                     <div class="plot-info">
                         <div>
-                            <h4 class="plot-title">3. Explainable AI - Phát hiện Rò rỉ Dữ liệu (SHAP Baseline với fpflag)</h4>
+                            <h4 class="plot-title">3. Explainable AI - Corrected SHAP Summary (No NASA Flags)</h4>
                             <p class="plot-desc">
-                                Biểu đồ SHAP của mô hình XGBoost có fpflag tiết lộ kết quả bất ngờ: đỉnh bảng biến quan trọng là nhóm lỗi chu kỳ (<code>koi_period_err1/2</code>) — dấu hiệu các cờ tương quan đang chiếm ưu thế thay vì vật lý thực chất.
+                                Mean |SHAP value| of each feature for the Pure Physics XGBoost model, split by class (the same 400 training rows as in the notebook). The original figure was drawn incorrectly: for a 3-class model the SHAP library returns a 3-D array, which the plotting call misread, so it showed only the first three table columns (<code>koi_period</code>, <code>koi_period_err1</code>, <code>koi_period_err2</code>). This figure was regenerated from the saved model in October 2026.
                             </p>
                         </div>
                         <div class="plot-insight">
-                            <span class="insight-tag">⚠️ Bằng chứng Rò rỉ:</span> Đây là lý do chúng ta phải xây dựng lại toàn bộ 3 mô hình với 36 đặc trưng Pure Physics — loại bỏ hoàn toàn 4 cờ fpflag!
+                            <span class="insight-tag">🌌 Analysis:</span> The model relies most on the transit signal-to-noise ratio (<code>koi_model_snr</code>) and the planet radius (<code>koi_prad</code>), followed by the uncertainties of stellar temperature and transit duration, the orbital period and the transit duration. Sky coordinates (<code>ra</code>, <code>dec</code>) also rank in the top 11, so not every signal the model uses is physical.
                         </div>
                     </div>
                 </div>
 
-                <!-- Plot 4: SHAP Pure Physics -->
-                <div class="plot-card">
-                    <div class="plot-img-container">
-                        <img src="./exoplanet_research_plots/shap_pure_physics.png" alt="SHAP Pure Physics Model" loading="lazy">
-                        <div class="plot-zoom-overlay">
-                            <span class="zoom-icon">🔍 PHÓNG TO CHI TIẾT (600 DPI)</span>
-                        </div>
-                    </div>
-                    <div class="plot-info">
-                        <div>
-                            <h4 class="plot-title">4. Explainable AI - SHAP Pure Physics (Không có NASA Flags)</h4>
-                            <p class="plot-desc">
-                                Sau khi loại bỏ fpflag, biểu đồ SHAP mô hình XGBoost Pure Physics cho thấy <code>koi_period_err2</code>, <code>koi_period_err1</code> và <code>koi_period</code> đứng đầu. Sai số chu kỳ nhỏ (sai số đo ổn định) là dấu hiệu nhận diện hành tinh thực theo Định luật Kepler.
-                            </p>
-                        </div>
-                        <div class="plot-insight">
-                            <span class="insight-tag">🌌 Phân tích:</span> Sai số chu kỳ rất nhỏ = tín hiệu ổn định ⇒ có khả năng là hành tinh thật. Sai số lớn = thiếu ổn định ⇒ khả năng FALSE POSITIVE. XGBoost đạt F1-CV = 0.8401 ± 0.007 trên 5-Fold.
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Plot 5: Confusion Matrix -->
+                <!-- Plot 4: Confusion Matrix -->
                 <div class="plot-card">
                     <div class="plot-img-container">
                         <img src="./exoplanet_research_plots/confusion_matrix_errors.png" alt="Confusion Matrix and Error Analysis" loading="lazy">
                         <div class="plot-zoom-overlay">
-                            <span class="zoom-icon">🔍 PHÓNG TO CHI TIẾT (600 DPI)</span>
+                            <span class="zoom-icon">🔍 ENLARGE (600 DPI)</span>
                         </div>
                     </div>
                     <div class="plot-info">
                         <div>
-                            <h4 class="plot-title">5. Phân tích Lỗi & Ma trận Nhầm lẫn — XGBoost (1,913 mẫu test)</h4>
+                            <h4 class="plot-title">4. Error Analysis &amp; Confusion Matrix — XGBoost (1,913 test samples)</h4>
                             <p class="plot-desc">
-                                Ma trận nhầm lẫn XGBoost Pure Physics trên 1,913 mẫu kiểm thử. Phân loại đúng: <strong>CANDIDATE 245/449</strong> (54.6%), <strong>CONFIRMED 390/459</strong> (85.0%), <strong>FALSE POSITIVE 882/1005</strong> (87.8%). Tổng phân loại sai: <strong>396 mẫu</strong>.
+                                Confusion matrix of the Pure Physics XGBoost model on the 1,913 test samples. Correctly classified: <strong>CANDIDATE 245/449</strong> (54.6%), <strong>CONFIRMED 390/459</strong> (85.0%), <strong>FALSE POSITIVE 882/1005</strong> (87.8%). Total misclassified: <strong>396 samples</strong>.
                             </p>
                         </div>
                         <div class="plot-insight">
-                            <span class="insight-tag">🔬 Phân tích Thiên văn:</span> Vùng nhầm lẫn cao nhất: CANDIDATE bị nhầm thành FALSE POSITIVE (<strong>137 ca</strong>) — do hệ sao đôi che khuất (Eclipsing Binaries) tạo tín hiệu chữ V giống tia quá cảnh chữ U của ngoại hành tinh, giới hạn tự nhiên của ML hiện tại.
+                            <span class="insight-tag">🔬 Astrophysical analysis:</span> The largest confusion is CANDIDATE predicted as FALSE POSITIVE (<strong>137 cases</strong>) — eclipsing binary stars produce V-shaped dips that resemble the U-shaped transit of an exoplanet, a natural limit for current ML.
                         </div>
                     </div>
                 </div>
@@ -426,32 +409,33 @@
              TAB 4: DATA LEAKAGE DEEP DIVE
              ========================================================================== -->
         <section id="tab-leakage" class="tab-panel">
-            <h3 class="section-heading"><span>🔬</span> Đào Sâu Khoa Học: Vấn Đề Rò Rỉ Dữ Liệu (Data Leakage) & AI Vật Lý</h3>
-            
+            <h3 class="section-heading"><span>🔬</span> Scientific Deep Dive: Data Leakage &amp; Physics-Based AI</h3>
+
             <div class="leakage-container">
                 <!-- Step 1: The Illusion -->
                 <div class="leakage-card highlight-red">
                     <h4 class="leakage-step-title" style="color: var(--status-false-pos);">
-                        <span>🚨</span> 1. Phát hiện Ảo tưởng 98.24% — Data Leakage trong NASA Archive
+                        <span>🚨</span> 1. The 98.24% Illusion — Data Leakage in the NASA Archive
                     </h4>
                     <p class="leakage-text">
-                        Trong phiên bản thực nghiệm ban đầu (43 đặc trưng), mô hình đạt tới <strong>98.24%</strong> và ROC-AUC ~0.999. Sau khi áp dụng phân tích <strong>SHAP (SHapley Additive exPlanations)</strong>, chúng tôi phát hiện AI không hề học định luật vật lý — chỉ "học vẹt" 4 cờ thẩm định thủ công của NASA:
+                        In the initial experimental version (43 features), the model reached <strong>98.24%</strong> accuracy and a ROC-AUC of about 0.999. But it was not learning physics: it was relying on 4 false-positive flags that are outputs of NASA's own vetting (the automated <strong>Robovetter</strong>) — the same process that assigns the labels — so the model was partly reading the answer:
+                    </p>
                     <div class="flag-box-grid">
                         <div class="flag-box">
                             <div class="flag-name">🚩 koi_fpflag_nt</div>
-                            <div class="flag-desc">Not Transit-Like Flag (Tín hiệu không giống quá cảnh)</div>
+                            <div class="flag-desc">Not Transit-Like Flag (the signal does not look like a transit)</div>
                         </div>
                         <div class="flag-box">
                             <div class="flag-name">🚩 koi_fpflag_ss</div>
-                            <div class="flag-desc">Stellar Eclipse Flag (Hiện tượng che khuất sao đôi)</div>
+                            <div class="flag-desc">Stellar Eclipse Flag (eclipsing binary star signature)</div>
                         </div>
                         <div class="flag-box">
                             <div class="flag-name">🚩 koi_fpflag_co</div>
-                            <div class="flag-desc">Centroid Offset Flag (Lệch tâm tín hiệu quang học)</div>
+                            <div class="flag-desc">Centroid Offset Flag (the dip is offset from the target star)</div>
                         </div>
                         <div class="flag-box">
                             <div class="flag-name">🚩 koi_fpflag_ec</div>
-                            <div class="flag-desc">Ephemeris Match Flag (Trùng khớp lịch thiên văn sao đôi)</div>
+                            <div class="flag-desc">Ephemeris Match Flag (same period and epoch as another, contaminating source)</div>
                         </div>
                     </div>
                 </div>
@@ -459,65 +443,65 @@
                 <!-- Step 2: The Solution -->
                 <div class="leakage-card highlight-green">
                     <h4 class="leakage-step-title" style="color: var(--status-confirmed);">
-                        <span>✅</span> 2. Giải pháp: Đồng nhất cả 3 mô hình sang Pure Physics Benchmark
+                        <span>✅</span> 2. The Fix: All 3 Models on the Pure Physics Benchmark
                     </h4>
                     <p class="leakage-text">
-                        Để đảm bảo tính khoa học chuẩn mực, chúng tôi đã loại bỏ 4 cờ gian lận khỏi <strong>toàn bộ pipeline huấn luyện</strong> — áp dụng đồng đều cho Random Forest, XGBoost và PyTorch 1D-CNN. Cả 3 mô hình đều được tái huấn luyện trên <strong>36 đặc trưng quang học &amp; quỹ đạo thuần túy</strong>.
+                        To keep the science sound, we removed the 4 leakage flags from the <strong>entire training pipeline</strong> — for Random Forest, XGBoost and the PyTorch 1D-CNN alike. All 3 models were retrained on the <strong>36 remaining transit, orbital &amp; stellar features</strong>.
                     </p>
                     <p class="leakage-text">
-                        Kết quả: Biểu đồ SHAP chứng minh AI đã thực sự <em>tự học</em> Định luật Quá cảnh Kepler. Các thông số dẫn đầu:
+                        Result: a corrected SHAP analysis (October 2026) shows which inputs the XGBoost model relies on most:
                     </p>
                     <ul class="model-features-list" style="max-width: 600px; margin-top: 1rem;">
-                        <li style="font-size: 1rem;">🔄 <strong>koi_period_err2</strong> (Sai số chu kỳ quỹ đạo âm): Tín hiệu ổn định ⇒ hành tinh thật.</li>
-                        <li style="font-size: 1rem;">🔄 <strong>koi_period_err1</strong> (Sai số chu kỳ quỹ đạo dương): Tín hiệu lặp lại đều đặn theo Định luật Kepler.</li>
-                        <li style="font-size: 1rem;">🔄 <strong>koi_period</strong> (Chu kỳ quỹ đạo): Xác định khoảng cách theo Định luật Kepler III.</li>
+                        <li style="font-size: 1rem;">📶 <strong>koi_model_snr</strong> <span>(transit signal-to-noise ratio): the strongest single input.</span></li>
+                        <li style="font-size: 1rem;">🪐 <strong>koi_prad, koi_period</strong> <span>(planet radius, orbital period): physical properties of the candidate planet.</span></li>
+                        <li style="font-size: 1rem;">📏 <strong>koi_steff_err1, koi_duration_err1</strong> <span>(measurement uncertainties): catalogue properties rather than physics. Like the sky coordinates ra and dec in the top 11, they show that a model can also pick up non-physical cues.</span></li>
                     </ul>
                 </div>
 
                 <!-- Comparison Table -->
                 <div class="leakage-card">
                     <h4 class="leakage-step-title" style="color: var(--nasa-blue);">
-                        <span>⚖️</span> Bảng So sánh Chi tiết Hai Cách tiếp cận
+                        <span>⚖️</span> Detailed Comparison of the Two Approaches
                     </h4>
                     <div class="table-wrapper">
                         <table class="leakage-table">
                             <thead>
                                 <tr>
-                                    <th>Tiêu chí Đánh giá</th>
-                                    <th>Phiên bản cũ — 43 đặc trưng (Có cờ NASA)</th>
-                                    <th>Phiên bản mới — 36 đặc trưng (Pure Physics ✅)</th>
+                                    <th>Criterion</th>
+                                    <th>Old version — 43 features (with NASA flags)</th>
+                                    <th>New version — 36 features (Pure Physics ✅)</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td><strong>Số đặc trưng đầu vào</strong></td>
-                                    <td class="acc-fake">43 đặc trưng (gồm 4 cờ fpflag)</td>
-                                    <td class="acc-real">36 đặc trưng vật lý thuần túy</td>
+                                    <td><strong>Number of input features</strong></td>
+                                    <td class="acc-fake">43 features (including the 4 fpflag columns)</td>
+                                    <td class="acc-real">36 features (no vetting flags)</td>
                                 </tr>
                                 <tr>
                                     <td><strong>Accuracy (RF / XGB / CNN)</strong></td>
-                                    <td class="acc-fake">98.24% / — / — (RF ảo tạo do fpflag)</td>
-                                    <td class="acc-real">79% / 79% / 75% (Đồng nhất thuần vật lý)</td>
+                                    <td class="acc-fake">98.24% / — / — (RF, inflated by fpflag)</td>
+                                    <td class="acc-real">79% / 79% / 75% (consistent, no flags)</td>
                                 </tr>
                                 <tr>
-                                    <td><strong>SHAP Top 1 Feature</strong></td>
-                                    <td><code>koi_fpflag_nt</code> (Cờ thẩm định thủ công)</td>
-                                    <td><code>koi_period_err2</code> (Sai số chu kỳ — Vật lý thật!)</td>
+                                    <td><strong>Top SHAP feature</strong></td>
+                                    <td>Not measured reliably (the original SHAP plots were drawn incorrectly)</td>
+                                    <td><code>koi_model_snr</code> (transit signal-to-noise ratio; corrected SHAP)</td>
                                 </tr>
                                 <tr>
-                                    <td><strong>Bản chất Học tập của AI</strong></td>
-                                    <td>RF học vẹt cờ con người (Data Leakage)</td>
-                                    <td>Cả 3 AI tự học định luật quang học &amp; quỹ đạo</td>
+                                    <td><strong>What the AI learns</strong></td>
+                                    <td>RF memorizes the vetting flags (data leakage)</td>
+                                    <td>All 3 models learn from transit, orbital &amp; stellar parameters (plus some catalogue artefacts)</td>
                                 </tr>
                                 <tr>
-                                    <td><strong>Khả năng Phát hiện Hành tinh Mới</strong></td>
-                                    <td style="color: var(--status-false-pos); font-weight: 600;">❌ RF Thất bại (phụ thuộc cờ thủ công)</td>
-                                    <td style="color: var(--status-confirmed); font-weight: 600;">✅ Cả 3 mô hình hoạt động trên dữ liệu thô</td>
+                                    <td><strong>Usable on not-yet-vetted data</strong></td>
+                                    <td style="color: var(--status-false-pos); font-weight: 600;">❌ RF fails (depends on the vetting flags)</td>
+                                    <td style="color: var(--status-confirmed); font-weight: 600;">✅ All 3 models work without vetting flags</td>
                                 </tr>
                                 <tr>
-                                    <td><strong>Ứng dụng cho sứ mệnh tương lai (TESS, PLATO)</strong></td>
-                                    <td style="color: var(--status-false-pos);">❌ Không khả thi</td>
-                                    <td style="color: var(--status-confirmed);">✅ Sẵn sàng triển khai thực chiến</td>
+                                    <td><strong>Use for future missions (TESS, PLATO)</strong></td>
+                                    <td style="color: var(--status-false-pos);">❌ Not feasible</td>
+                                    <td style="color: var(--star-gold);">⚠️ Possible in principle, after retraining on that mission's data</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -530,9 +514,9 @@
              TAB 5: MODEL WEIGHTS & EXPORT
              ========================================================================== -->
         <section id="tab-weights" class="tab-panel">
-            <h3 class="section-heading"><span>📁</span> Kiến Trúc Hệ Thống & Trọng Số Mô Hình Đã Đóng Gói</h3>
+            <h3 class="section-heading"><span>📁</span> System Architecture &amp; Packaged Model Weights</h3>
             <p style="color: var(--text-muted); margin-bottom: 2rem;">
-                Các mô hình đã huấn luyện thành công trên máy chủ GPU Kaggle và được đóng gói, lưu trữ trong thư mục <code style="color: var(--nasa-blue); background: #f1f5f9; padding: 0.2rem 0.5rem; border-radius: 4px;">./weight/</code>. Sẵn sàng tích hợp vào các hệ thống quan trắc thời gian thực hoặc REST API backend.
+                The models were trained in a Kaggle notebook (the recorded run used the CPU) and exported to the <code style="color: var(--nasa-blue); background: #f1f5f9; padding: 0.2rem 0.5rem; border-radius: 4px;">./weight/</code> folder, ready to plug into real-time observation pipelines or a REST API backend.
             </p>
 
             <div class="weights-grid">
@@ -541,8 +525,8 @@
                     <div class="weight-icon">🌲</div>
                     <div class="weight-details">
                         <div class="weight-filename">random_forest_baseline.pkl</div>
-                        <div class="weight-meta">Rừng cây 100 cây — Pure Physics, 36 đặc trưng vật lý (Scikit-learn Joblib).</div>
-                        <span class="weight-size-badge">📦 Kích thước: 24.2 MB</span>
+                        <div class="weight-meta">100-tree random forest — Pure Physics, 36 features (scikit-learn, joblib).</div>
+                        <span class="weight-size-badge">📦 Size: 24.2 MB</span>
                     </div>
                 </div>
 
@@ -551,8 +535,8 @@
                     <div class="weight-icon">⚡</div>
                     <div class="weight-details">
                         <div class="weight-filename">xgboost_physics_model.json</div>
-                        <div class="weight-meta">Mô hình XGBoost Vật lý thuần túy (Native XGBoost JSON Booster).</div>
-                        <span class="weight-size-badge">📦 Kích thước: 3.96 MB</span>
+                        <div class="weight-meta">Pure Physics XGBoost model (native XGBoost JSON booster).</div>
+                        <span class="weight-size-badge">📦 Size: 3.96 MB</span>
                     </div>
                 </div>
 
@@ -561,8 +545,8 @@
                     <div class="weight-icon">🧠</div>
                     <div class="weight-details">
                         <div class="weight-filename">1d_cnn_weights.pth</div>
-                        <div class="weight-meta">Trọng số mạng học sâu PyTorch 1D-CNN (StateDict Tensor).</div>
-                        <span class="weight-size-badge">📦 Kích thước: 80 KB</span>
+                        <div class="weight-meta">PyTorch 1D-CNN weights (state dict).</div>
+                        <span class="weight-size-badge">📦 Size: 86.4 KB</span>
                     </div>
                 </div>
 
@@ -571,8 +555,8 @@
                     <div class="weight-icon">⚖️</div>
                     <div class="weight-details">
                         <div class="weight-filename">scaler_main.pkl</div>
-                        <div class="weight-meta">Bộ chuẩn hóa Z-Score StandardScaler đã fit trên tập huấn luyện.</div>
-                        <span class="weight-size-badge">📦 Kích thước: 2.4 KB</span>
+                        <div class="weight-meta">Z-score StandardScaler fitted on the training set (corrected in October 2026: the earlier file had been refit on the full dataset).</div>
+                        <span class="weight-size-badge">📦 Size: 2.2 KB</span>
                     </div>
                 </div>
 
@@ -581,8 +565,8 @@
                     <div class="weight-icon">🏷️</div>
                     <div class="weight-details">
                         <div class="weight-filename">label_encoder.pkl</div>
-                        <div class="weight-meta">Bộ mã hóa nhãn nhị phân/đa lớp (CONFIRMED, CANDIDATE, FALSE POSITIVE).</div>
-                        <span class="weight-size-badge">📦 Kích thước: 514 B</span>
+                        <div class="weight-meta">Label encoder for the 3 classes (CANDIDATE = 0, CONFIRMED = 1, FALSE POSITIVE = 2).</div>
+                        <span class="weight-size-badge">📦 Size: 514 B</span>
                     </div>
                 </div>
             </div>
@@ -599,8 +583,8 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <p>🌌 <span class="footer-highlight">ExoHunt AI - NASA Exoplanet Research</span> &mdash; Phát triển dựa trên dữ liệu sứ mệnh Kepler của NASA.</p>
-        <p style="margin-top: 0.4rem; font-size: 0.8rem;">Được tối ưu hóa cho Trình duyệt Web & Hệ thống Nhận diện Máy học Thời gian thực.</p>
+        <p>🌌 <span class="footer-highlight">ExoHunt AI - NASA Exoplanet Research</span> &mdash; Built on data from NASA's Kepler mission.</p>
+        <p style="margin-top: 0.4rem; font-size: 0.8rem;">Optimized for web browsers &amp; real-time machine-learning classification.</p>
     </footer>
 
     <script src="script.js"></script>

@@ -1,31 +1,34 @@
 /* ==========================================================================
    ExoHunt AI - NASA Exoplanet Discovery Engine
-   Vanilla JavaScript Interactivity & AI Inference Simulator
+   Vanilla JavaScript interactivity & classification demo
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Khởi tạo hệ thống Tab ngay lập tức để đảm bảo chuyển Tab luôn mượt mà
+    // 1. Set up the tab system first so tab switching always works
     initTabs();
     initPresetSelector();
     initSliders();
     initModelSwitcher();
     initLightbox();
-    
-    // 2. Khởi tạo hiệu ứng nền
+
+    // 2. Background animation
     try {
         initBackgroundParticles();
     } catch (e) {
-        console.warn("Hiệu ứng nền không khởi chạy được, bỏ qua:", e);
+        console.warn("Background animation could not start, skipping:", e);
     }
-    
-    // 3. Khởi tạo dự đoán AI lần đầu
+
+    // 3. First classification result
     try {
         updateInferenceEngine();
     } catch (e) {
-        console.warn("Lỗi khởi tạo suy luận AI:", e);
+        console.warn("Could not initialise the classification demo:", e);
     }
-    
-    // 4. Tự động resize canvas khi thay đổi kích thước cửa sổ
+
+    // 4. Look for the optional local Python backend (app.py)
+    detectBackend();
+
+    // 5. Redraw the canvas when the window is resized
     window.addEventListener('resize', () => {
         const playgroundTab = document.getElementById('tab-playground');
         if (playgroundTab && playgroundTab.classList.contains('active')) {
@@ -43,10 +46,10 @@ function initBackgroundParticles() {
     document.body.prepend(canvas);
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    
+
     let width = canvas.width = window.innerWidth || 1200;
     let height = canvas.height = window.innerHeight || 800;
-    
+
     window.addEventListener('resize', () => {
         width = canvas.width = window.innerWidth || 1200;
         height = canvas.height = window.innerHeight || 800;
@@ -54,7 +57,7 @@ function initBackgroundParticles() {
 
     const particles = [];
     const numParticles = Math.min(Math.floor((width * height) / 18000), 80);
-    
+
     for (let i = 0; i < numParticles; i++) {
         particles.push({
             x: Math.random() * width,
@@ -69,30 +72,30 @@ function initBackgroundParticles() {
     function animateParticles() {
         if (!ctx) return;
         ctx.clearRect(0, 0, width, height);
-        
+
         for (let i = 0; i < particles.length; i++) {
             let p = particles[i];
             p.x += p.vx;
             p.y += p.vy;
-            
+
             if (p.x < 0) p.x = width;
             if (p.x > width) p.x = 0;
             if (p.y < 0) p.y = height;
             if (p.y > height) p.y = 0;
-            
+
             // Draw particle node
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
             ctx.fillStyle = `rgba(37, 99, 235, ${p.alpha})`;
             ctx.fill();
-            
+
             // Draw constellation lines between nearby nodes
             for (let j = i + 1; j < particles.length; j++) {
                 let p2 = particles[j];
                 let dx = p.x - p2.x;
                 let dy = p.y - p2.y;
                 let dist = Math.sqrt(dx * dx + dy * dy);
-                
+
                 if (dist < 140) {
                     ctx.beginPath();
                     ctx.moveTo(p.x, p.y);
@@ -109,30 +112,30 @@ function initBackgroundParticles() {
 }
 
 /* ==========================================================================
-   2. TAB NAVIGATION SYSTEM (HOÀN TOÀN KHÔNG BỊ CHẶN LỖI)
+   2. TAB NAVIGATION SYSTEM (WORKS EVEN IF OTHER PARTS FAIL)
    ========================================================================== */
 function initTabs() {
     const tabButtons = document.querySelectorAll('.tab-btn');
     const tabPanels = document.querySelectorAll('.tab-panel');
-    
+
     tabButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
             const targetId = btn.getAttribute('data-tab');
             if (!targetId) return;
-            
+
             // Remove active from all
             tabButtons.forEach(b => b.classList.remove('active'));
             tabPanels.forEach(p => p.classList.remove('active'));
-            
+
             // Add active to current
             btn.classList.add('active');
             const targetPanel = document.getElementById(targetId);
             if (targetPanel) {
                 targetPanel.classList.add('active');
             }
-            
-            // Re-render canvas with current slider values if playground is selected
+
+            // Re-render canvas with current values if the playground is selected
             if (targetId === 'tab-playground') {
                 setTimeout(renderCurrentLightcurve, 60);
             }
@@ -140,89 +143,148 @@ function initTabs() {
     });
 }
 
-/* Helper function to render lightcurve using current active slider values */
+/* Helper: render the light curve for the current preset or slider values */
 function renderCurrentLightcurve() {
-    const depthEl = document.getElementById('slider-depth');
-    const durationEl = document.getElementById('slider-duration');
-    const depth = depthEl ? parseFloat(depthEl.value) : 269.4;
-    const duration = durationEl ? parseFloat(durationEl.value) : 3.0;
-    renderLightcurve(depth, duration);
+    const v = getCurrentInputs();
+    if (v) renderLightcurve(v.depth, v.duration, v.shape);
 }
 
 /* ==========================================================================
    3. PRESET TARGET DATA & SELECTOR
+   Real objects: values from NASA's cumulative KOI table (data/cumulative.csv).
    ========================================================================== */
 const PRESET_TARGETS = {
     'kepler-227b': {
         name: 'Kepler-227 b (K00752.01)',
-        type: 'CONFIRMED',
-        srad: 1.01,
-        steff: 5845,
-        period: 2.13,
-        depth: 269.4,
-        slogg: 4.47,
-        duration: 2.95,
-        desc: 'Ngoại hành tinh xác nhận thuộc hệ sao Kepler-227, quỹ đạo ngắn, độ sâu quá cảnh rõ nét.'
+        label: 'CONFIRMED',          // NASA catalogue disposition
+        split: 'training',           // split used in the notebook (random_state=42)
+        srad: 0.927,
+        steff: 5455,
+        period: 9.488,
+        depth: 615.8,
+        slogg: 4.467,
+        duration: 2.958,
+        shape: 'U',
+        desc: 'Confirmed exoplanet in the Kepler-227 system, with a short orbit and a clear transit depth.'
     },
     'kepler-227c': {
         name: 'Kepler-227 c (K00752.02)',
-        type: 'CONFIRMED',
-        srad: 1.01,
-        steff: 5845,
-        period: 17.80,
-        depth: 180.3,
-        slogg: 4.47,
-        duration: 4.50,
-        desc: 'Hành tinh thứ 2 trong hệ Kepler-227, quỹ đạo rộng hơn và thời gian quá cảnh dài hơn.'
+        label: 'CONFIRMED',
+        split: 'training',
+        srad: 0.927,
+        steff: 5455,
+        period: 54.418,
+        depth: 874.8,
+        slogg: 4.467,
+        duration: 4.507,
+        shape: 'U',
+        desc: 'The second planet in the Kepler-227 system, with a wider orbit and a longer transit.'
     },
     'kepler-664b': {
         name: 'Kepler-664 b (K00755.01)',
-        type: 'CONFIRMED',
-        srad: 1.05,
-        steff: 5831,
-        period: 4.30,
-        depth: 312.5,
-        slogg: 4.44,
-        duration: 3.10,
-        desc: 'Hành tinh xác nhận với chu kỳ 4.3 ngày, tín hiệu quá cảnh cực kỳ ổn định.'
+        label: 'CONFIRMED',
+        split: 'training',
+        srad: 1.046,
+        steff: 6031,
+        period: 2.526,
+        depth: 603.3,
+        slogg: 4.438,
+        duration: 1.655,
+        shape: 'U',
+        desc: 'Confirmed planet with a 2.53-day period and a very stable transit signal.'
     },
     'false-binary': {
         name: 'K00753.01 (Eclipsing Binary)',
-        type: 'FALSE POSITIVE',
-        srad: 0.87,
+        label: 'FALSE POSITIVE',
+        split: 'training',
+        srad: 0.868,
         steff: 5853,
-        period: 19.90,
-        depth: 10829.0,
-        slogg: 4.54,
-        duration: 5.80,
-        desc: 'Hệ sao đôi che khuất (Eclipsing Binary). Độ sáng giảm sụt cực lớn (>10,000 ppm) dạng chữ V, giả mạo ngoại hành tinh.'
+        period: 19.899,
+        depth: 10829,
+        slogg: 4.544,
+        duration: 1.782,
+        shape: 'V',
+        desc: 'Eclipsing binary star (false positive). A very large, V-shaped drop in brightness (>10,000 ppm) that mimics an exoplanet.'
     },
     'super-earth': {
-        name: 'Super-Earth Habitable Candidate',
-        type: 'CANDIDATE',
+        name: 'Hypothetical super-Earth (not a real KOI)',
+        hypothetical: true,
         srad: 0.65,
         steff: 3800,
         period: 35.50,
         depth: 450.0,
         slogg: 4.70,
         duration: 3.80,
-        desc: 'Mục tiêu ứng viên Siêu Trái Đất quay quanh sao lùn đỏ vùng sống được (Habitable Zone).'
+        shape: 'U',
+        desc: 'Hypothetical example (not a real KOI): a super-Earth of about 1.5 Earth radii orbiting a cool dwarf star.'
     },
     'hot-jupiter': {
-        name: 'Hot Jupiter Giant',
-        type: 'CONFIRMED',
+        name: 'Hypothetical hot Jupiter (not a real KOI)',
+        hypothetical: true,
         srad: 1.20,
         steff: 6200,
         period: 1.50,
         depth: 12500.0,
         slogg: 4.20,
         duration: 2.20,
-        desc: 'Hành tinh khí khổng lồ quay sát sao chủ, tạo ra độ sụt giảm ánh sáng cực lớn nhưng đáy chữ U bằng phẳng.'
+        shape: 'U',
+        desc: 'Hypothetical example (not a real KOI): a gas giant orbiting very close to its star, producing a very deep dip with a flat, U-shaped bottom.'
+    }
+};
+
+/* Real outputs of the saved models in ./weight/ for the four real KOIs above.
+   Computed offline from each object's 36 catalogue features (median-imputed and scaled with
+   the training-set scaler, exactly as in the notebook), because the models cannot run on a
+   static web page. All four objects were in the training split, so these are in-sample. */
+const PRESET_MODEL_OUTPUTS = {
+    'kepler-227b': {
+        'Random Forest': { 'CONFIRMED': 0.98,     'CANDIDATE': 0.02,     'FALSE POSITIVE': 0.0 },
+        'XGBoost':       { 'CONFIRMED': 0.92546,  'CANDIDATE': 0.072498, 'FALSE POSITIVE': 0.002042 },
+        '1D-CNN':        { 'CONFIRMED': 0.886719, 'CANDIDATE': 0.110791, 'FALSE POSITIVE': 0.00249 }
+    },
+    'kepler-227c': {
+        'Random Forest': { 'CONFIRMED': 0.99,     'CANDIDATE': 0.01,     'FALSE POSITIVE': 0.0 },
+        'XGBoost':       { 'CONFIRMED': 0.978217, 'CANDIDATE': 0.020429, 'FALSE POSITIVE': 0.001354 },
+        '1D-CNN':        { 'CONFIRMED': 0.951819, 'CANDIDATE': 0.046411, 'FALSE POSITIVE': 0.001769 }
+    },
+    'kepler-664b': {
+        'Random Forest': { 'CONFIRMED': 0.83,     'CANDIDATE': 0.05,     'FALSE POSITIVE': 0.12 },
+        'XGBoost':       { 'CONFIRMED': 0.888496, 'CANDIDATE': 0.055386, 'FALSE POSITIVE': 0.056118 },
+        '1D-CNN':        { 'CONFIRMED': 0.72779,  'CANDIDATE': 0.165385, 'FALSE POSITIVE': 0.106825 }
+    },
+    'false-binary': {
+        'Random Forest': { 'CONFIRMED': 0.04,     'CANDIDATE': 0.12,     'FALSE POSITIVE': 0.84 },
+        'XGBoost':       { 'CONFIRMED': 0.001982, 'CANDIDATE': 0.069824, 'FALSE POSITIVE': 0.928194 },
+        '1D-CNN':        { 'CONFIRMED': 0.02884,  'CANDIDATE': 0.408954, 'FALSE POSITIVE': 0.562205 }
+    }
+};
+
+/* Test-set results recorded in the notebook (1,913 test KOIs). */
+const MODEL_INFO = {
+    'XGBoost': {
+        color: '#1e40af',
+        title: '⚡ XGBoost Pure Physics',
+        file: 'weight/xgboost_physics_model.json',
+        metrics: 'test accuracy 79.3% · macro-F1 0.76 · ROC-AUC 0.966 · 5-fold CV macro-F1 0.739 ± 0.010'
+    },
+    'Random Forest': {
+        color: '#0e7a3a',
+        title: '🌲 Random Forest Pure Physics',
+        file: 'weight/random_forest_baseline.pkl',
+        metrics: 'test accuracy 78.5% · precision/recall CONFIRMED 0.83/0.82, FALSE POSITIVE 0.86/0.86 · trained after SMOTE balancing (4,018 samples per class)'
+    },
+    '1D-CNN': {
+        color: '#4338ca',
+        title: '🧠 PyTorch 1D-CNN Pure Physics',
+        file: 'weight/1d_cnn_weights.pth',
+        metrics: 'test accuracy 74.9% · ROC-AUC 0.959 · hardest class CANDIDATE (precision 0.50, recall 0.62)'
     }
 };
 
 let currentModel = 'XGBoost';
 let currentTargetKey = 'kepler-227b';
+let backendAvailable = false;
+let requestCounter = 0;
 
 function initPresetSelector() {
     const presetBtns = document.querySelectorAll('.preset-btn');
@@ -231,11 +293,11 @@ function initPresetSelector() {
             e.preventDefault();
             presetBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            
+
             const targetKey = btn.getAttribute('data-preset');
             currentTargetKey = targetKey;
             const data = PRESET_TARGETS[targetKey];
-            
+
             if (data) {
                 setSliderValue('slider-srad', data.srad);
                 setSliderValue('slider-steff', data.steff);
@@ -243,7 +305,7 @@ function initPresetSelector() {
                 setSliderValue('slider-depth', data.depth);
                 setSliderValue('slider-slogg', data.slogg);
                 setSliderValue('slider-duration', data.duration);
-                
+
                 updateInferenceEngine();
             }
         });
@@ -261,6 +323,25 @@ function setSliderValue(id, val) {
     }
 }
 
+/* Inputs for the current view: the exact catalogue values for a preset,
+   otherwise the slider positions. */
+function getCurrentInputs() {
+    const preset = PRESET_TARGETS[currentTargetKey];
+    if (preset) {
+        return { srad: preset.srad, steff: preset.steff, period: preset.period, depth: preset.depth,
+                 slogg: preset.slogg, duration: preset.duration, shape: preset.shape };
+    }
+    const ids = ['srad', 'steff', 'period', 'depth', 'slogg', 'duration'];
+    const v = {};
+    for (const id of ids) {
+        const el = document.getElementById('slider-' + id);
+        if (!el) return null;
+        v[id] = parseFloat(el.value);
+    }
+    v.shape = v.depth > 7000 ? 'V' : 'U';
+    return v;
+}
+
 /* ==========================================================================
    4. SLIDERS & LIVE TELEMETRY UPDATES
    ========================================================================== */
@@ -275,11 +356,11 @@ function initSliders() {
             if (display) {
                 display.textContent = val + unit;
             }
-            
-            // Deselect presets when user manually slides
+
+            // Deselect presets when the user moves a slider by hand
             document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
             currentTargetKey = 'custom';
-            
+
             updateInferenceEngine();
         });
     });
@@ -295,7 +376,7 @@ function initModelSwitcher() {
             e.preventDefault();
             switchBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            
+
             currentModel = btn.getAttribute('data-model') || 'XGBoost';
             updateInferenceEngine();
         });
@@ -303,157 +384,111 @@ function initModelSwitcher() {
 }
 
 /* ==========================================================================
-   6. AI INFERENCE SIMULATOR ENGINE
+   6. CLASSIFICATION ENGINE
+   - Real Kepler objects: precomputed outputs of the saved models.
+   - Anything else: the local Python backend (app.py) if it is running,
+     otherwise a clearly labelled rule-based illustration.
    ========================================================================== */
+function detectBackend() {
+    fetch('/api/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: 'XGBoost' })
+    })
+    .then(res => (res.ok ? res.json() : null))
+    .then(data => {
+        if (data && data.probs && data.source === 'model') {
+            backendAvailable = true;
+            const status = document.getElementById('status-text');
+            if (status) status.textContent = 'Python inference server connected';
+            updateInferenceEngine();
+        }
+    })
+    .catch(() => { /* static hosting: no backend */ });
+}
+
 function updateInferenceEngine() {
-    const sradEl = document.getElementById('slider-srad');
-    const steffEl = document.getElementById('slider-steff');
-    const periodEl = document.getElementById('slider-period');
-    const depthEl = document.getElementById('slider-depth');
-    const sloggEl = document.getElementById('slider-slogg');
-    const durationEl = document.getElementById('slider-duration');
-    
-    if (!sradEl || !steffEl || !periodEl || !depthEl || !sloggEl || !durationEl) {
+    const v = getCurrentInputs();
+    if (!v) return;
+    const requestId = ++requestCounter;
+    const preset = PRESET_TARGETS[currentTargetKey];
+    const precomputed = PRESET_MODEL_OUTPUTS[currentTargetKey];
+
+    updatePresetDescription(preset);
+    renderLightcurve(v.depth, v.duration, v.shape);
+
+    if (precomputed) {
+        renderPredictionResults(precomputed[currentModel], 'precomputed');
+        updateResultDetails('precomputed', v, preset);
         return;
     }
-    
-    const srad = parseFloat(sradEl.value);
-    const steff = parseFloat(steffEl.value);
-    const period = parseFloat(periodEl.value);
-    const depth = parseFloat(depthEl.value);
-    const slogg = parseFloat(sloggEl.value);
-    const duration = parseFloat(durationEl.value);
-    
-    // Try fetching from local Python API if available, otherwise simulate astrophysical model
+
+    const showRules = () => {
+        if (requestId !== requestCounter) return;
+        renderPredictionResults(ruleBasedIllustration(v), 'rules');
+        updateResultDetails('rules', v, preset);
+    };
+
+    if (!backendAvailable) {
+        showRules();
+        return;
+    }
+
     fetch('/api/predict', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             model: currentModel,
-            srad, steff, period, depth, slogg, duration
+            srad: v.srad, steff: v.steff, period: v.period, depth: v.depth, slogg: v.slogg, duration: v.duration
         })
     })
-    .then(res => res.json())
+    .then(res => (res.ok ? res.json() : Promise.reject(res.status)))
     .then(data => {
-        renderPredictionResults(data.probs, data.prediction, data.confidence);
-    })
-    .catch(() => {
-        // Client-side Astrophysical Model Simulation (when Python server is offline or DLL error occurs)
-        const simResult = simulateAstrophysicalModel(currentModel, srad, steff, period, depth, slogg, duration);
-        renderPredictionResults(simResult.probs, simResult.prediction, simResult.confidence);
-    });
-    
-    renderLightcurve(depth, duration);
-    updateXAIRationale(srad, steff, period, depth, duration);
-}
-
-function simulateAstrophysicalModel(model, srad, steff, period, depth, slogg, duration) {
-    let probConfirmed = 0.33;
-    let probCandidate = 0.33;
-    let probFalsePos = 0.34;
-    
-    // Check if current target is one of the presets to reflect exact notebook behaviors
-    if (currentTargetKey !== 'custom' && PRESET_TARGETS[currentTargetKey]) {
-        const preset = PRESET_TARGETS[currentTargetKey];
-        
-        // All 3 models now use Pure Physics (36 features, no fpflag)
-        // RF: Accuracy 79%, XGB: Accuracy 79% (F1-CV 0.84), CNN: Accuracy 75%
-        if (model === 'Random Forest') {
-            // Pure Physics RF - moderate confidence, similar to XGBoost
-            if (preset.type === 'CONFIRMED') {
-                probConfirmed = 0.62; probCandidate = 0.24; probFalsePos = 0.14;
-            } else if (preset.type === 'FALSE POSITIVE') {
-                probConfirmed = 0.08; probCandidate = 0.09; probFalsePos = 0.83;
-            } else {
-                probConfirmed = 0.22; probCandidate = 0.57; probFalsePos = 0.21;
-            }
-        } else if (model === 'XGBoost') {
-            // XGBoost Pure Physics: Accuracy 79%, F1-CV 0.84 ±0.007
-            // Cell 29 demo: Kepler-227b → FALSE POSITIVE 67.61%, CONFIRMED 25.78%
-            if (preset.type === 'CONFIRMED') {
-                probConfirmed = 0.68; probCandidate = 0.22; probFalsePos = 0.10;
-                if (currentTargetKey === 'kepler-227b') {
-                    // Exact numbers from notebook Cell 29 demo!
-                    probConfirmed = 0.2578; probCandidate = 0.0661; probFalsePos = 0.6761;
-                }
-            } else if (preset.type === 'FALSE POSITIVE') {
-                probConfirmed = 0.05; probCandidate = 0.10; probFalsePos = 0.85;
-            } else {
-                probConfirmed = 0.28; probCandidate = 0.54; probFalsePos = 0.18;
-            }
-        } else if (model === '1D-CNN') {
-            // 1D-CNN Pure Physics: Accuracy 75%, softer probabilities
-            if (preset.type === 'CONFIRMED') {
-                probConfirmed = 0.60; probCandidate = 0.28; probFalsePos = 0.12;
-            } else if (preset.type === 'FALSE POSITIVE') {
-                probConfirmed = 0.10; probCandidate = 0.12; probFalsePos = 0.78;
-            } else {
-                probConfirmed = 0.25; probCandidate = 0.62; probFalsePos = 0.13;
-            }
-        }
-    } else {
-        // Manual Custom Sliders Simulation based on astrophysical rules
-        if (depth > 8000 && srad < 1.0) {
-            // Eclipsing binary signature: huge depth on small star
-            probFalsePos = 0.82; probCandidate = 0.12; probConfirmed = 0.06;
-        } else if (depth >= 100 && depth <= 5000 && period > 1.0 && srad >= 0.5 && srad <= 2.0) {
-            // Classic planetary transit signature
-            probConfirmed = 0.55; probCandidate = 0.30; probFalsePos = 0.15;
-        } else if (depth < 100 || period > 100) {
-            // Weak or long period -> Candidate
-            probCandidate = 0.55; probConfirmed = 0.20; probFalsePos = 0.25;
+        if (requestId !== requestCounter) return;
+        if (data.source === 'model') {
+            renderPredictionResults(data.probs, 'backend');
+            updateResultDetails('backend', v, preset);
         } else {
-            probFalsePos = 0.45; probCandidate = 0.35; probConfirmed = 0.20;
+            showRules();
         }
-        
-        // Model-specific adjustments (all Pure Physics, slight architectural differences)
-        if (model === 'Random Forest') {
-            // RF tends slightly sharper separations
-            probConfirmed = Math.min(probConfirmed * 1.05, 1.0);
-        } else if (model === '1D-CNN') {
-            // CNN gives softer, more uncertain distributions at 75% accuracy
-            probCandidate = Math.min(probCandidate + 0.06, 1.0);
-        }
-        
-        // Normalize probabilities to sum to 1.0
-        const total = probConfirmed + probCandidate + probFalsePos;
-        probConfirmed /= total;
-        probCandidate /= total;
-        probFalsePos /= total;
-    }
-    
-    // Determine top class
-    let prediction = 'CONFIRMED';
-    let maxProb = probConfirmed;
-    
-    if (probCandidate > maxProb) {
-        prediction = 'CANDIDATE';
-        maxProb = probCandidate;
-    }
-    if (probFalsePos > maxProb) {
-        prediction = 'FALSE POSITIVE';
-        maxProb = probFalsePos;
-    }
-    
-    return {
-        probs: {
-            CONFIRMED: probConfirmed,
-            CANDIDATE: probCandidate,
-            'FALSE POSITIVE': probFalsePos
-        },
-        prediction: prediction,
-        confidence: (maxProb * 100).toFixed(1)
-    };
+    })
+    .catch(showRules);
 }
 
-function renderPredictionResults(probs, prediction, confidence) {
+/* Simple rules of thumb, NOT a trained model. */
+function ruleBasedIllustration(v) {
+    let probConfirmed, probCandidate, probFalsePos;
+    if (v.depth > 8000 && v.srad < 1.0) {
+        // Eclipsing-binary signature: very deep dip on a small star
+        probFalsePos = 0.82; probCandidate = 0.12; probConfirmed = 0.06;
+    } else if (v.depth >= 100 && v.depth <= 5000 && v.period > 1.0 && v.srad >= 0.5 && v.srad <= 2.0) {
+        // Typical planetary transit signature
+        probConfirmed = 0.55; probCandidate = 0.30; probFalsePos = 0.15;
+    } else if (v.depth < 100 || v.period > 100) {
+        // Weak or long-period signal -> stays a candidate
+        probCandidate = 0.55; probConfirmed = 0.20; probFalsePos = 0.25;
+    } else {
+        probFalsePos = 0.45; probCandidate = 0.35; probConfirmed = 0.20;
+    }
+    return { 'CONFIRMED': probConfirmed, 'CANDIDATE': probCandidate, 'FALSE POSITIVE': probFalsePos };
+}
+
+function renderPredictionResults(probs, source) {
     const resultBox = document.getElementById('prediction-result-box');
+    const statusEl = document.getElementById('pred-status-label');
     const titleEl = document.getElementById('pred-main-title');
     const confEl = document.getElementById('pred-conf-score');
-    
+
+    // Top class
+    let prediction = 'CONFIRMED';
+    let maxProb = probs['CONFIRMED'];
+    if (probs['CANDIDATE'] > maxProb) { prediction = 'CANDIDATE'; maxProb = probs['CANDIDATE']; }
+    if (probs['FALSE POSITIVE'] > maxProb) { prediction = 'FALSE POSITIVE'; maxProb = probs['FALSE POSITIVE']; }
+    const confidence = (maxProb * 100).toFixed(1);
+
     if (resultBox && titleEl && confEl) {
         resultBox.className = 'prediction-result-box';
-        
+
         if (prediction === 'CONFIRMED') {
             resultBox.classList.add('confirmed');
             titleEl.textContent = '🌟 CONFIRMED EXOPLANET';
@@ -467,57 +502,60 @@ function renderPredictionResults(probs, prediction, confidence) {
             titleEl.textContent = '⚠️ FALSE POSITIVE';
             titleEl.style.color = 'var(--status-false-pos)';
         }
-        
-        confEl.textContent = `Độ tự tin AI (${currentModel}): ${confidence}%`;
+
+        if (source === 'rules') {
+            confEl.textContent = `Rule-based estimate: ${confidence}% (no trained model)`;
+        } else {
+            confEl.textContent = `AI confidence (${currentModel}): ${confidence}%`;
+        }
     }
-    
+
+    if (statusEl) {
+        statusEl.textContent = {
+            precomputed: 'AI CLASSIFICATION RESULT · SAVED MODEL (PRECOMPUTED)',
+            backend: 'AI CLASSIFICATION RESULT · LIVE PYTHON BACKEND',
+            rules: 'RULE-BASED ILLUSTRATION · NOT A TRAINED MODEL'
+        }[source];
+    }
+
     // Update probability bars
-    const barConfirmed = document.getElementById('bar-confirmed');
-    const barCandidate = document.getElementById('bar-candidate');
-    const barFalsePos = document.getElementById('bar-false-pos');
-    
-    const valConfirmed = document.getElementById('val-confirmed');
-    const valCandidate = document.getElementById('val-candidate');
-    const valFalsePos = document.getElementById('val-false-pos');
-    
-    if (barConfirmed && valConfirmed) {
-        const p = (probs['CONFIRMED'] * 100).toFixed(1);
-        barConfirmed.style.width = p + '%';
-        valConfirmed.textContent = p + '%';
-    }
-    if (barCandidate && valCandidate) {
-        const p = (probs['CANDIDATE'] * 100).toFixed(1);
-        barCandidate.style.width = p + '%';
-        valCandidate.textContent = p + '%';
-    }
-    if (barFalsePos && valFalsePos) {
-        const p = (probs['FALSE POSITIVE'] * 100).toFixed(1);
-        barFalsePos.style.width = p + '%';
-        valFalsePos.textContent = p + '%';
+    const bars = [
+        ['bar-confirmed', 'val-confirmed', 'CONFIRMED'],
+        ['bar-candidate', 'val-candidate', 'CANDIDATE'],
+        ['bar-false-pos', 'val-false-pos', 'FALSE POSITIVE']
+    ];
+    for (const [barId, valId, key] of bars) {
+        const bar = document.getElementById(barId);
+        const val = document.getElementById(valId);
+        if (bar && val) {
+            const p = (probs[key] * 100).toFixed(1);
+            bar.style.width = p + '%';
+            val.textContent = p + '%';
+        }
     }
 }
 
 /* ==========================================================================
-   7. LIVE TRANSIT LIGHTCURVE SIMULATOR (CANVAS)
+   7. LIVE TRANSIT LIGHTCURVE SIMULATOR (CANVAS, ILLUSTRATION ONLY)
    ========================================================================== */
-function renderLightcurve(depth = 269.4, duration = 3.0) {
+function renderLightcurve(depth = 615.8, duration = 3.0, shape = 'U') {
     const canvas = document.getElementById('lightcurve-canvas');
     if (!canvas) return;
-    
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    
+
     const containerWidth = canvas.parentElement.clientWidth || 600;
     const width = canvas.width = containerWidth - 56;
     const height = canvas.height = 220;
-    
+
     ctx.clearRect(0, 0, width, height);
-    
-    // Background: Deep Aerospace Monitor Theme
+
+    // Background: deep aerospace monitor theme
     ctx.fillStyle = '#0f172a';
     ctx.fillRect(0, 0, width, height);
-    
-    // Draw grid lines
+
+    // Grid lines
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
     ctx.lineWidth = 1;
     for (let x = 0; x < width; x += 50) {
@@ -526,25 +564,25 @@ function renderLightcurve(depth = 269.4, duration = 3.0) {
     for (let y = 0; y < height; y += 35) {
         ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
     }
-    
+
     // Normal flux line (y = 50)
     const baseFluxY = 50;
-    
-    // Calculate dip magnitude based on depth (max dip to y = 180)
+
+    // Dip size from depth (maximum dip down to y = 190), width from duration
     const dipMagnitude = Math.min(Math.max((depth / 10000) * 120, 20), 140);
     const dipWidth = Math.min(Math.max(duration * 26, 45), width * 0.6);
     const centerX = width / 2;
-    
-    // Draw lightcurve
+
+    // Draw the light curve
     ctx.beginPath();
     ctx.moveTo(0, baseFluxY);
-    
-    const isVShape = depth > 7000;
-    
+
+    const isVShape = shape === 'V';
+
     for (let x = 0; x <= width; x += 2) {
         let y = baseFluxY;
         const distFromCenter = Math.abs(x - centerX);
-        
+
         if (distFromCenter < dipWidth / 2) {
             if (isVShape) {
                 const factor = 1 - (distFromCenter / (dipWidth / 2));
@@ -554,18 +592,18 @@ function renderLightcurve(depth = 269.4, duration = 3.0) {
                 y = baseFluxY + (dipMagnitude * Math.pow(factor, 0.6));
             }
         }
-        
+
         y += (Math.random() - 0.5) * 2.5;
         ctx.lineTo(x, y);
     }
-    
+
     ctx.strokeStyle = '#38bdf8';
     ctx.lineWidth = 3.5;
     ctx.shadowColor = '#0284c7';
     ctx.shadowBlur = 14;
     ctx.stroke();
     ctx.shadowBlur = 0;
-    
+
     const lowestY = baseFluxY + dipMagnitude;
     ctx.beginPath();
     ctx.arc(centerX, lowestY, 6, 0, Math.PI * 2);
@@ -574,37 +612,44 @@ function renderLightcurve(depth = 269.4, duration = 3.0) {
     ctx.shadowBlur = 12;
     ctx.fill();
     ctx.shadowBlur = 0;
-    
+
     ctx.fillStyle = '#94a3b8';
     ctx.font = '12px "JetBrains Mono", monospace';
-    ctx.fillText('Độ sáng chuẩn (Stellar Flux 1.0)', 16, 28);
-    
+    ctx.fillText('Normalized stellar flux = 1.0', 16, 28);
+
     ctx.fillStyle = '#38bdf8';
     ctx.font = 'bold 13px "JetBrains Mono", monospace';
-    ctx.fillText(`Đáy quá cảnh (-${depth} ppm | Thời gian ${duration}h)`, Math.max(16, centerX - 120), lowestY - 14);
+    ctx.fillText(`Transit depth -${depth} ppm | duration ${duration} h`, Math.max(16, centerX - 120), lowestY - 14);
 }
 
 /* ==========================================================================
-   8. EXPLAINABLE AI (XAI) RATIONALE GENERATOR
+   8. RESULT DETAILS (WHAT PRODUCED THE NUMBERS ABOVE)
    ========================================================================== */
-function updateXAIRationale(srad, steff, period, depth, duration) {
+function updatePresetDescription(preset) {
+    const el = document.getElementById('preset-desc');
+    if (!el) return;
+    el.textContent = preset ? preset.desc : 'Custom values set with the sliders.';
+}
+
+function updateResultDetails(source, v, preset) {
     const xaiContent = document.getElementById('xai-content');
     if (!xaiContent) return;
-    
-    let rationale = '';
-    
-    if (currentModel === 'XGBoost') {
-        rationale = `<div style="margin-bottom: 0.6rem; color: #1e40af; font-weight: 800; font-size: 1.05rem;">⚡ XGBoost Pure Physics (Accuracy 79% | F1-CV: 0.84):</div>
-        Mô hình Gradient Boosting huấn luyện trên <strong>36 đặc trưng vật lý thuần túy</strong>, đã loại bỏ hoàn toàn 4 cờ fpflag của NASA. Với độ sâu <strong>${depth} ppm</strong> trên sao bán kính <strong>${srad} R☉</strong> và chu kỳ <strong>${period} ngày</strong>, AI tự suy luận theo Định luật Kepler. SHAP Top-1: <code>koi_srad</code> → <code>koi_depth</code> → <code>koi_period</code>. Kiểm định 5-Fold CV: F1 = 0.8401 ± 0.007.`;
-    } else if (currentModel === 'Random Forest') {
-        rationale = `<div style="margin-bottom: 0.6rem; color: #0e7a3a; font-weight: 800; font-size: 1.05rem;">🌲 Random Forest Pure Physics (Accuracy 79%):</div>
-        Rừng cây 100 cây được tái huấn luyện trên <strong>36 đặc trưng vật lý thuần túy</strong> (không có cờ fpflag). Cây quyết định đánh giá chu kỳ <strong>${period} ngày</strong>, độ sâu <strong>${depth} ppm</strong>, nhiệt độ sao <strong>${steff} K</strong>. Trải qua cân bằng SMOTE (4018 mẫu/lớp) trước huấn luyện. Kết quả Precision/Recall: CONFIRMED 0.83/0.82, FALSE POSITIVE 0.86/0.86.`;
-    } else if (currentModel === '1D-CNN') {
-        rationale = `<div style="margin-bottom: 0.6rem; color: #4338ca; font-weight: 800; font-size: 1.05rem;">🧠 PyTorch 1D-CNN Pure Physics (Accuracy 75%):</div>
-        Mạng tích chập Conv1D(1→16→32) + MaxPool + Dense(64) huấn luyện trên <strong>36 đặc trưng vật lý</strong>. Tín hiệu quá cảnh kéo dài <strong>${duration} giờ</strong> với độ sâu <strong>${depth} ppm</strong> được mạng phân tích qua biểu diễn đặc trưng không gian. Phân phối softmax mềm hơn XGBoost, đặc biệt khó phân loại CANDIDATE (Precision 0.50, Recall 0.62).`;
+    const info = MODEL_INFO[currentModel];
+    let html = '';
+
+    if (source === 'precomputed') {
+        html = `<div style="margin-bottom: 0.6rem; color: ${info.color}; font-weight: 800; font-size: 1.05rem;">${info.title} (${info.metrics}):</div>
+        <strong>${preset.name}</strong> — NASA catalogue label: <strong>${preset.label}</strong>.<br>
+        These probabilities are the real output of the saved model (<code style="overflow-wrap: anywhere;">${info.file}</code>) for this object's 36 catalogue features, precomputed offline because the models cannot run on a static web page. The object was in the <strong>${preset.split}</strong> split, so this is an in-sample prediction and will look more confident than for a new object.`;
+    } else if (source === 'backend') {
+        html = `<div style="margin-bottom: 0.6rem; color: ${info.color}; font-weight: 800; font-size: 1.05rem;">${info.title} — live output from the Python backend:</div>
+        Live output of the saved model (<code style="overflow-wrap: anywhere;">${info.file}</code>) from <code>app.py</code>. Only the 6 slider values (depth <strong>${v.depth} ppm</strong>, period <strong>${v.period} days</strong>, star radius <strong>${v.srad} R☉</strong>, …) are sent; the other 30 features are set to their training-set averages, so treat this as a what-if illustration rather than a real classification.`;
+    } else {
+        html = `<div style="margin-bottom: 0.6rem; color: #b45309; font-weight: 800; font-size: 1.05rem;">📐 Rule-based illustration (no trained model):</div>
+        ${preset && preset.hypothetical ? '<strong>' + preset.name + '</strong>. ' : ''}The trained models need all 36 catalogue features, so on this static page they only run for the four real Kepler objects. These bars come from simple rules of thumb instead: very deep dips around small stars look like eclipsing binaries, 100–5,000 ppm dips with periods over 1 day look planet-like, and very shallow dips or periods over 100 days stay candidates. The model buttons do not change this estimate. Run the Python backend (<code>python app.py</code>) to score custom values with the real models.`;
     }
-    
-    xaiContent.innerHTML = rationale;
+
+    xaiContent.innerHTML = html;
 }
 
 /* ==========================================================================
@@ -615,9 +660,9 @@ function initLightbox() {
     const modalImg = document.getElementById('modal-img');
     const closeBtn = document.getElementById('modal-close');
     const plotContainers = document.querySelectorAll('.plot-img-container');
-    
+
     if (!modal || !modalImg) return;
-    
+
     plotContainers.forEach(container => {
         container.addEventListener('click', () => {
             const img = container.querySelector('img');
@@ -627,13 +672,13 @@ function initLightbox() {
             }
         });
     });
-    
+
     if (closeBtn) {
         closeBtn.addEventListener('click', () => {
             modal.classList.remove('active');
         });
     }
-    
+
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
             modal.classList.remove('active');

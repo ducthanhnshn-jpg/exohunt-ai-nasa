@@ -371,7 +371,7 @@ body {
 /* Model Architecture Cards */
 .models-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
     gap: 2.2rem;
 }
 
@@ -485,6 +485,11 @@ body {
     .playground-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* Let the demo panels shrink on narrow screens instead of widening the page */
+.playground-grid > .panel-card {
+    min-width: 0;
 }
 
 .panel-card {

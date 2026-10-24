@@ -1,68 +1,73 @@
 # 🌌 ExoHunt AI - NASA Kepler Exoplanet Discovery Engine
-**Ứng dụng Trí tuệ Nhân tạo Khám phá Ngoại hành tinh từ Dữ liệu Kính viễn vọng Không gian NASA Kepler**
+**An Artificial Intelligence Application for Exploring Exoplanets with NASA Kepler Space Telescope Data**
 
 ---
 
-## 📌 1. TỔNG QUAN DỰ ÁN (PROJECT OVERVIEW)
-Dự án **ExoHunt AI** là một hệ thống nghiên cứu khoa học dữ liệu và học máy chuyên sâu, áp dụng các kiến trúc Trí tuệ Nhân tạo hiện đại để giải mã tín hiệu suy giảm ánh sáng (lightcurves) từ **9,564 mục tiêu quan trắc (Kepler Objects of Interest - KOI)** của Kính viễn vọng Không gian NASA Kepler.
+## 📌 1. PROJECT OVERVIEW
+**ExoHunt AI** is an in-depth data-science and machine-learning research project. It applies modern AI architectures to classify the light-dip (transit) signals of **9,564 Kepler Objects of Interest (KOIs)** from NASA's Kepler Space Telescope, using the parameters listed for each signal in NASA's cumulative KOI catalogue (the light curves themselves are not used).
 
-Mục tiêu cốt lõi của nghiên cứu là phân loại chính xác các tín hiệu thu nhận được thành 3 nhóm đối tượng thiên văn:
-1. 🟢 **CONFIRMED (Hành tinh xác nhận):** Các ngoại hành tinh thực thụ quay quanh sao chủ, có tín hiệu che khuất ánh sáng hình chữ U đáy phẳng đặc trưng.
-2. 🔵 **CANDIDATE (Ứng viên hành tinh):** Các tín hiệu tiềm năng cần quan trắc thêm để xác minh.
-3. 🔴 **FALSE POSITIVE (Tín hiệu giả mạo):** Các hiện tượng thiên văn bị nhầm lẫn với ngoại hành tinh (chủ yếu là hệ **sao đôi che khuất chéo - Eclipsing Binaries** tạo ra đáy chữ V sâu hoặc các hiện tượng nhiễu từ trường sao chủ).
+The core goal of the research is to classify each signal into one of 3 groups of astronomical objects:
+1. 🟢 **CONFIRMED (confirmed planet):** real exoplanets orbiting their host star, with the characteristic flat-bottomed, U-shaped transit signal.
+2. 🔵 **CANDIDATE (planet candidate):** promising signals that need more observations before they can be verified.
+3. 🔴 **FALSE POSITIVE (impostor signal):** astronomical phenomena mistaken for exoplanets (mainly **eclipsing binary stars**, which produce deep V-shaped dips, or noise from the host star's activity).
 
 ---
 
-## 🤖 2. SO SÁNH 3 KIẾN TRÚC MÔ HÌNH AI (PURE PHYSICS BENCHMARK)
+## 🤖 2. COMPARING 3 AI MODEL ARCHITECTURES (PURE PHYSICS BENCHMARK)
 
-Trong nghiên cứu cải tiến mới nhất, chúng tôi đã đồng nhất cả 3 mô hình trên chuẩn **Pure Physics (36 đặc trưng thuần vật lý)** — loại bỏ hoàn toàn các cờ thẩm định thủ công của con người từ NASA. Toàn bộ các mô hình được huấn luyện trên GPU Kaggle và kiểm định chéo (5-Fold Stratified Cross-Validation):
+In the latest version of the research, all 3 models use the same **Pure Physics** setup: **36 features without NASA's vetting flags** — the four false-positive flags produced by NASA's automated vetting (the Robovetter) are removed completely. All models were trained in a Kaggle notebook (the recorded run used the CPU); XGBoost was additionally checked with 5-fold stratified cross-validation:
 
-| Kiến trúc Mô hình | Kỹ thuật cốt lõi | Độ chính xác (Test Acc) | ROC-AUC | Vai trò trong Báo cáo Nghiên cứu |
+| Model Architecture | Core Technique | Test Accuracy | ROC-AUC | Role in the Research |
 | :--- | :--- | :---: | :---: | :--- |
-| 🌲 **Random Forest** | Ensemble Decision Trees (100 estimators), SMOTE Balancing | **79.0%** | **0.961** | **Mô hình Ensemble Rừng cây:** Huấn luyện trên 36 đặc trưng quang học & quỹ đạo thuần túy, đạt độ ổn định cao. |
-| ⚡ **XGBoost Pure Physics** | Gradient Boosting, Anti-Leakage Protection | **79.0%** | **0.966** | **Mô hình Vật lý Thuần túy (Core Breakthrough):** Đạt F1-Score CV 0.84 ± 0.007. Buộc AI tự học định luật che khuất quang học và định luật Kepler III. |
-| 🧠 **PyTorch 1D-CNN** | Deep Learning: Conv1D(16→32) + BatchNorm + MaxPool1D + Dropout(0.3) | **75.0%** | **0.959** | **Mạng Học sâu Không gian:** Tự động trích xuất tương tác phi tuyến tính phức tạp giữa các thông số chu kỳ, độ sâu và bán kính sao. |
+| 🌲 **Random Forest** | Ensemble of decision trees (100 estimators), SMOTE balancing | **78.5%** | **0.961** | **Tree-ensemble model:** trained on the 36 transit, orbital & stellar features, with high stability. |
+| ⚡ **XGBoost Pure Physics** | Gradient boosting, anti-leakage protection | **79.3%** | **0.966** | **Pure Physics model (core result):** 5-fold CV macro-F1 0.739 ± 0.010. Forces the model to learn from transit, orbital and stellar parameters instead of the vetting flags. |
+| 🧠 **PyTorch 1D-CNN** | Deep learning: Conv1D(16→32) + BatchNorm + MaxPool1D + Dropout(0.3) | **74.9%** | **0.959** | **Convolutional deep network:** automatically extracts complex non-linear interactions between the period, depth and stellar-radius parameters. |
+
+*Test accuracy is measured on 1,913 test KOIs with all 3 labels. ROC-AUC is for the CONFIRMED class (one-vs-rest).*
 
 ---
 
-## 🔬 3. ĐỘT PHÁ KHOA HỌC: PHÁT HIỆN RÒ RỈ DỮ LIỆU (DATA LEAKAGE DEEP-DIVE)
+## 🔬 3. SCIENTIFIC FINDING: DATA LEAKAGE (DEEP DIVE)
 
-Một trong những phát hiện quan trọng nhất của nghiên cứu này nằm ở **Phần 6c & Phần 7 (SHAP Analysis)** trong Notebook:
+The key parts of this analysis are **Sections 4, 6 and 6c** of the notebook:
 
-### 🚨 Vấn đề "Ảo tưởng 98.24%" (Why Baseline achieved 98%?)
-Khi huấn luyện mô hình Baseline ban đầu trên 43 đặc trưng, độ chính xác đạt ngưỡng cực cao 98.24%. Tuy nhiên, khi sử dụng công cụ giải thích AI **SHAP (SHapley Additive exPlanations)** để phân tích đóng góp của từng biến, chúng tôi phát hiện đỉnh bảng biến quan trọng đều là các cờ thẩm định thủ công do các nhà thiên văn học NASA gán sau khi đã phân tích:
+### 🚨 The "98.24% Illusion" (Why did the baseline reach 98%?)
+When the initial baseline model was trained on 43 features, its accuracy reached an extremely high 98.24%. But four of those columns are false-positive flags produced by NASA's own vetting (the automated Robovetter) — the same process that assigns the labels — so the model was partly reading the answer:
 * `koi_fpflag_nt` (Not Transit-Like Flag)
-* `koi_fpflag_ss` (Stellar Eclipse Flag - Sao đôi che khuất)
+* `koi_fpflag_ss` (Stellar Eclipse Flag - eclipsing binary)
 * `koi_fpflag_co` (Centroid Offset Flag)
 * `koi_fpflag_ec` (Ephemeris Match Flag)
 
-👉 **Kết luận:** Mô hình cũ bị mắc lỗi **Rò rỉ dữ liệu (Data Leakage)** nghiêm trọng — AI không hề "hiểu" vật lý thiên văn mà chỉ đang "học vẹt" kết quả gán nhãn của con người! Một mô hình như vậy sẽ **hoàn toàn vô dụng** khi áp dụng vào các sứ mệnh viễn vọng mới (như TESS hay PLATO) khi dữ liệu thu về là dữ liệu thô chưa có ai gán cờ!
+👉 **Conclusion:** the old model suffered from serious **data leakage** — the AI did not "understand" astrophysics, it was "memorizing" the result of NASA's vetting! Such a model would be **useless** on data from new telescope missions (such as TESS or PLATO), where the incoming data have not yet been flagged by anyone.
 
-### 💡 Giải pháp Đồng nhất & Sự thật về Định luật Quá cảnh (Pure Physics Benchmark)
-Để xây dựng một AI thực sự có năng lực tự khám phá ngoại hành tinh mới, chúng tôi đã **kiên quyết loại bỏ hoàn toàn 4 cờ gian lận trên khỏi toàn bộ pipeline** và tái huấn luyện cả 3 mô hình (Random Forest, XGBoost, 1D-CNN) trên **36 đặc trưng thuần vật lý**.
-* **Độ chính xác chuẩn mực:** Đạt ngưỡng **75% - 79%** (AUC **0.959 - 0.966**) — đây là con số trung thực tuyệt đối phản ánh đúng độ khó của vũ trụ và năng lực phân loại thực chất của AI!
-* **Biểu đồ SHAP Vật lý mới:** Chứng minh AI đã tự động đưa các thông số chu kỳ và sai số đo đạc lên dẫn đầu:
-  1. `koi_period_err2` & `koi_period_err1` (Sai số chu kỳ - Nhận diện độ ổn định tín hiệu theo thời gian)
-  2. `koi_period` (Chu kỳ quỹ đạo - Tuân theo Định luật Kepler III)
-  3. `koi_depth` & `koi_srad` (Độ sâu quá cảnh & Bán kính sao - Quyết định tỷ lệ che khuất quang học)
+### 💡 The Fix: the Pure Physics Benchmark
+To build an AI that could genuinely find new exoplanets, we **removed the 4 leakage flags from the entire pipeline** and retrained all 3 models (Random Forest, XGBoost, 1D-CNN) on the **36 remaining features** (transit, orbital and stellar parameters).
+* **Honest accuracy:** **75% - 79%** (AUC **0.959 - 0.966**) — an honest figure that reflects how hard the task really is and what the models can actually do.
+* **Corrected SHAP analysis:** the original SHAP figures were drawn incorrectly. For a 3-class model, recent SHAP versions return an array of shape (samples, features, classes); `shap.summary_plot` read it as interaction values and drew only the first three columns of the table (`koi_period`, `koi_period_err1`, `koi_period_err2`), so those columns only *looked* most important. The corrected per-class SHAP summary (regenerated from the saved XGBoost model in October 2026) ranks the features as follows:
+  1. `koi_model_snr` (transit signal-to-noise ratio) — by far the strongest input
+  2. `koi_prad` (planet radius)
+  3. `koi_steff_err1` & `koi_duration_err1` (measurement uncertainties — catalogue properties rather than physics)
+  4. `koi_period` & `koi_duration` (orbital period and transit duration)
+
+  Sky coordinates (`ra`, `dec`) also rank in the top 11, so not every signal the model uses is physical.
 
 ---
 
-## 🚀 4. HƯỚNG DẪN CÀI ĐẶT THƯ VIỆN & CHẠY DỰ ÁN (HOW TO RUN PROJECT)
+## 🚀 4. HOW TO INSTALL THE LIBRARIES & RUN THE PROJECT
 
-Dự án được hỗ trợ chạy linh hoạt theo 2 phương thức: **Chạy Máy chủ Backend Python (FastAPI + PyTorch Engine)** hoặc **Chạy Trực tiếp trên Trình duyệt (Offline Client-side Mode)**.
+The project can run in 2 ways: **with the Python backend server (FastAPI + PyTorch engine)** or **directly in the browser (offline client-side mode)**.
 
-### 🛠️ Bước 1: Cài đặt Thư viện Python (Prerequisites & Requirements)
-Để máy chủ Python có thể tải các mô hình `.pkl`, `.json` và `.pth` từ thư mục `./weight/`, bạn cần cài đặt các thư viện được liệt kê trong file **`requirements.txt`**:
+### 🛠️ Step 1: Install the Python libraries (prerequisites & requirements)
+For the Python server to load the `.pkl`, `.json` and `.pth` models from the `./weight/` folder, install the libraries listed in **`requirements.txt`**:
 
-1. Mở Terminal (Command Prompt / PowerShell / VS Code Terminal) tại thư mục dự án `exohunt-ai-nasa`:
+1. Open a terminal (Command Prompt / PowerShell / VS Code Terminal) in the project folder `exohunt-ai-nasa`:
    ```bash
    pip install -r requirements.txt
    ```
 
-2. **⚠️ LƯU Ý ĐẶC BIỆT CHO WINDOWS (Khắc phục lỗi PyTorch WinError 127):**
-   Nếu khi chạy lệnh trên Windows, bạn gặp lỗi liên quan đến thiếu CUDA DLL (ví dụ: `[WinError 127] The specified procedure could not be found... c10_cuda.dll`), nguyên nhân là do gói PyTorch mặc định tìm kiếm card đồ họa NVIDIA CUDA không tương thích.
-   👉 **Cách khắc phục triệt để:** Gỡ bản PyTorch hiện tại và cài đặt phiên bản **PyTorch CPU-Only**:
+2. **⚠️ SPECIAL NOTE FOR WINDOWS (fixing the PyTorch WinError 127):**
+   If you get an error about a missing CUDA DLL on Windows (for example `[WinError 127] The specified procedure could not be found... c10_cuda.dll`), it is because the default PyTorch package looks for an incompatible NVIDIA CUDA graphics card.
+   👉 **Fix:** uninstall the current PyTorch and install the **CPU-only PyTorch** build:
    ```bash
    pip uninstall torch torchvision torchaudio -y
    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
@@ -70,55 +75,68 @@ Dự án được hỗ trợ chạy linh hoạt theo 2 phương thức: **Chạy
 
 ---
 
-### ⚡ Bước 2: Khởi động Máy chủ & Trải nghiệm Ứng dụng
+### ⚡ Step 2: Start the server & use the app
 
-#### Phương án A: Chạy Máy chủ Backend Python FastAPI (Khuyên dùng)
-Khi chạy qua máy chủ Python, hệ thống sẽ trực tiếp gọi suy luận (inference) từ các trọng số mô hình thật trong thư mục `./weight/`:
-1. Chạy lệnh khởi động máy chủ:
+#### Option A: Run the Python FastAPI backend (recommended)
+With the Python server, the app runs inference directly with the real model weights in `./weight/`:
+1. Start the server:
    ```bash
    python app.py
    ```
-2. Mở trình duyệt web (Google Chrome, Microsoft Edge, Firefox, Safari) và truy cập địa chỉ hiển thị trên terminal:
+2. Open a web browser (Google Chrome, Microsoft Edge, Firefox, Safari) and go to the address shown in the terminal:
    👉 **`http://127.0.0.1:8000`**
-3. Giao diện **ExoHunt AI Observatory** sẽ tải lên. Mọi thao tác kéo thanh trượt trên tab *A/B Testing* sẽ gửi yêu cầu xử lý thời gian thực tới máy chủ Python!
+3. The **ExoHunt AI Observatory** interface loads. Moving any slider on the *A/B Testing* tab sends a real-time request to the Python server. The server receives only the 6 slider values and sets the other 30 features to their training-set averages. The four real Kepler presets always show the precomputed model outputs for their full catalogue data.
 
-#### Phương án B: Chạy Trực tiếp trên Trình duyệt (Chế độ Offline Nhanh nhất)
-Trong trường hợp bạn không muốn cài đặt Python hoặc đang mở trên máy tính không có môi trường lập trình, ứng dụng đã được tích hợp sẵn **Bộ phỏng đoán AI phía máy khách (Client-side Astrophysical Simulator)**:
-1. Mở thư mục dự án `exohunt-ai-nasa`.
-2. Nhấp đúp chuột trực tiếp vào file **`index.html`** (hoặc chuột phải chọn *Open with -> Google Chrome / Microsoft Edge*).
-3. Toàn bộ các tính năng: giả lập A/B Testing, vẽ đường cong ánh sáng Lightcurve thời gian thực và xem ảnh độ phân giải cao 600 DPI đều hoạt động mượt mà 100%!
+#### Option B: Run directly in the browser (fastest, offline)
+If you do not want to install Python, or you are on a computer without a programming environment, you can open the page on its own:
+1. Open the `exohunt-ai-nasa` project folder.
+2. Double-click **`index.html`** (or right-click and choose *Open with -> Google Chrome / Microsoft Edge*).
+3. All features work: the A/B Testing demo, the simulated transit light curve and the 600-DPI figures. Without the server, the trained models run only for the four real Kepler presets (their outputs were precomputed from the saved weights); the hypothetical presets and custom slider values show a clearly labelled rule-based illustration instead.
 
 ---
 
-## 📁 5. CẤU TRÚC THƯ MỤC DỰ ÁN (DIRECTORY STRUCTURE)
+## 📁 5. DIRECTORY STRUCTURE
 
 ```text
-d:/Slide_THPT/DangDucThanh_AI/exohunt-ai-nasa/
+exohunt-ai-nasa/
 │
-├── 📄 index.html                        # Giao diện HTML5 Đài quan trắc (5 Tabs chức năng)
-├── 🎨 style.css                         # Hệ thống giao diện Deep Space Dark Mode, Glassmorphism
-├── ⚡ script.js                         # Bộ xử lý tương tác, Giả lập A/B Testing & Canvas Lightcurve
-├── 🐍 app.py                            # Máy chủ FastAPI & PyTorch Inference Engine
-├── 📦 requirements.txt                  # Danh sách thư viện chuẩn (FastAPI, PyTorch, XGBoost, SHAP...)
-├── 📖 README.md                         # Tài liệu báo cáo & hướng dẫn sử dụng (File này)
-├── ⚙️ .gitignore                        # Cấu hình bỏ qua file rác dịch mã Python & cache
+├── 📄 index.html                        # HTML5 observatory interface (5 tabs)
+├── 🎨 style.css                         # Interface styling (light theme, glassmorphism)
+├── ⚡ script.js                         # Interactivity, A/B Testing demo & canvas light curve
+├── 🐍 app.py                            # FastAPI server & PyTorch inference engine
+├── 📦 requirements.txt                  # Library list (FastAPI, PyTorch, XGBoost, SHAP...)
+├── 📖 README.md                         # Report & user guide (this file)
+├── ⚙️ .gitignore                        # Ignores Python build files & caches
 │
-├── 📓 exohunt-ai-nasa-dangducthanh.ipynb # Notebook nghiên cứu gốc (1,748 dòng code EDA, ML, DL, SHAP)
+├── 📓 exohunt-ai-nasa-dangducthanh.ipynb # Original research notebook (about 500 lines of code: EDA, ML, DL, SHAP)
 │
-├── 📂 exoplanet_research_plots/         # Thư viện 5 biểu đồ nghiên cứu chất lượng cao (600 DPI)
-│   ├── eda_exoplanet_analysis.png       # Biểu đồ Khám phá dữ liệu & tương quan vật lý
-│   ├── roc_auc_comparison.png           # Đường cong ROC-AUC so sánh 3 mô hình (AUC 0.959 - 0.966)
-│   ├── shap_feature_importance.png      # Biểu đồ SHAP Baseline (Phát hiện Data Leakage fpflag)
-│   ├── shap_pure_physics.png            # Biểu đồ SHAP Vật lý thuần túy (Đột phá nghiên cứu)
-│   └── confusion_matrix_errors.png      # Ma trận nhầm lẫn & Phân tích lỗi Eclipsing Binaries (1,913 mẫu)
+├── 📂 data/
+│   └── cumulative.csv                   # NASA cumulative KOI table (Kaggle "Kepler Exoplanet Search Results")
 │
-└── 📂 weight/                           # Thư mục chứa trọng số các mô hình đã đóng gói
-    ├── random_forest_baseline.pkl       # Trọng số Random Forest Pure Physics (24.2 MB)
-    ├── xgboost_physics_model.json       # Trọng số XGBoost Pure Physics (3.96 MB)
-    ├── 1d_cnn_weights.pth               # Trọng số PyTorch 1D-CNN StateDict (80 KB)
-    ├── scaler_main.pkl                  # Bộ chuẩn hóa Z-Score StandardScaler (2.4 KB)
-    └── label_encoder.pkl                # Bộ mã hóa nhãn nhị phân/đa lớp (514 B)
+├── 📂 exoplanet_research_plots/         # 5 high-resolution research figures (600 DPI)
+│   ├── eda_exoplanet_analysis.png       # Exploratory data analysis & physical relationships
+│   ├── roc_auc_comparison.png           # ROC-AUC curves comparing the 3 models (AUC 0.959 - 0.966)
+│   ├── shap_feature_importance.png      # Corrected SHAP summary of the Section 6 XGBoost model (same 36 features)
+│   ├── shap_pure_physics.png            # Corrected SHAP summary of the Pure Physics XGBoost model (Section 6c)
+│   └── confusion_matrix_errors.png      # Confusion matrix & error analysis (1,913 test samples)
+│
+└── 📂 weight/                           # Packaged model weights
+    ├── random_forest_baseline.pkl       # Random Forest Pure Physics (24.2 MB)
+    ├── xgboost_physics_model.json       # XGBoost Pure Physics (3.96 MB)
+    ├── 1d_cnn_weights.pth               # PyTorch 1D-CNN state dict (86.4 KB)
+    ├── scaler_main.pkl                  # Z-score StandardScaler fitted on the training set (2.2 KB)
+    └── label_encoder.pkl                # Label encoder: CANDIDATE=0, CONFIRMED=1, FALSE POSITIVE=2 (514 B)
 ```
 
 ---
-*Tác giả nghiên cứu & phát triển ứng dụng: Đặng Đức Thành - ExoHunt AI NASA Exoplanet Research Project.*
+
+## 📝 6. NOTES & CORRECTIONS (OCTOBER 2026)
+
+* **SHAP figures:** both SHAP figures were regenerated with a corrected per-class plot (see Section 3). Because Cell 4 of the notebook already removes the four flags, the Section 6 and Section 6c XGBoost models are identical, so the two figures show the same model.
+* **Exported scaler:** `weight/scaler_main.pkl` used to be refit on the full dataset (9,564 rows) during the cross-validation step, instead of the training-set scaler the models were trained with. With that file the XGBoost model's test accuracy fell to 67.1%. The file now holds the training-set scaler (7,651 rows), which reproduces the notebook's test results exactly.
+* **Backend:** `app.py` mapped the model probabilities to the wrong labels (CANDIDATE and CONFIRMED were swapped). It now maps them by class name and reports whether a result came from a model or from the rule-based fallback.
+* **Web demo:** the static page used to show hard-coded probabilities chosen from each preset's known label. It now shows the real outputs of the saved models for the four real Kepler objects and labels everything else as a rule-based illustration.
+* **Cross-validation:** the earlier figure of F1 0.840 came from cross-validating on the SMOTE-oversampled training set, where synthetic samples made from the same KOIs land in both training and validation folds. The leakage-free 5-fold CV in Section 6b gives macro-F1 0.739 ± 0.010.
+
+---
+*Research & app development: Đặng Đức Thanh - ExoHunt AI NASA Exoplanet Research Project.*
