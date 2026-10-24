@@ -264,6 +264,24 @@ body {
     box-shadow: var(--shadow-lg);
 }
 
+.hero-paper {
+    margin-top: 1.6rem;
+    padding: 1rem 1.2rem;
+    background: rgba(255, 255, 255, 0.78);
+    border: 1px solid #bfdbfe;
+    border-radius: 14px;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    position: relative;
+    z-index: 1;
+}
+
+.hero-paper a {
+    color: var(--nasa-blue);
+    font-weight: 700;
+}
+
 .hero-banner::after {
     content: '🪐';
     position: absolute;

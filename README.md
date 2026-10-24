@@ -1,6 +1,8 @@
 # 🌌 ExoHunt AI - NASA Kepler Exoplanet Discovery Engine
 **An Artificial Intelligence Application for Exploring Exoplanets with NASA Kepler Space Telescope Data**
 
+📄 **Published paper:** Dang D. T., Pham H. B. C., Nguyen M. D., & Trinh T. D. (2026). *What Do Machine Learning Models Actually Learn from the Kepler Object of Interest Catalogue? Separating Label Leakage from Label-Set Choice.* International Journal of Academic Engineering Research, 10(9), 237–247. [Read the paper (PDF)](http://ijeais.org/wp-content/uploads/2026/9/IJAER260918.pdf)
+
 ---
 
 ## 📌 1. PROJECT OVERVIEW
@@ -139,4 +141,4 @@ exohunt-ai-nasa/
 * **Cross-validation:** the earlier figure of F1 0.840 came from cross-validating on the SMOTE-oversampled training set, where synthetic samples made from the same KOIs land in both training and validation folds. The leakage-free 5-fold CV in Section 6b gives macro-F1 0.739 ± 0.010.
 
 ---
-*Research & app development: Đặng Đức Thanh - ExoHunt AI NASA Exoplanet Research Project.*
+*Research team: Dang D. T. (Đặng Đức Thanh), Pham H. B. C., Nguyen M. D. & Trinh T. D. · Web app development: Đặng Đức Thanh - ExoHunt AI NASA Exoplanet Research Project.*
